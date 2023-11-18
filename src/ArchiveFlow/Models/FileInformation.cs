@@ -1,5 +1,6 @@
 ﻿using System;
 using ArchiveFlow.Abstractions;
+using SharpCompress.Archives;
 
 namespace ArchiveFlow.Models
 {
@@ -10,10 +11,9 @@ namespace ArchiveFlow.Models
         public long Size { get; set; }
         public DateTime LastModified { get; set; }
         public bool IsCompressed { get; set; }
-        // object ? because we don't want a client to have a dependency on SharpCompress
-        public object? ArchiveReference { get; set; }
+        public IArchive? ArchiveReference { get; set; } // only for internal
 
-        public FileInformation(string fileName, string extension, long size, DateTime lastModified, bool isCompressed, object? archiveReference = null)
+        public FileInformation(string fileName, string extension, long size, DateTime lastModified, bool isCompressed, IArchive? archiveReference = null)
         {
             FileName = fileName;
             Extension = extension;

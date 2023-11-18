@@ -14,24 +14,22 @@ namespace ArchiveFlow.FileProcessor
     public class FileProcessor
     {
         private string folderPath;
-        private FileReadMode readMode = FileReadMode.Text;
         private FileSourceType? sourceType = FileSourceType.Both;
-        private List<string> extensions = new List<string>();
-        private FileInformationFilter? fileFilter;
-        private FileInformationFilter? zipFileFilter;
+        private List<string> includedExtensions = new List<string>();
+        private FileInformationFilter? includeFile;
+        private FileInformationFilter? includeZipFile;
         private StreamProcessingAction? streamProcessingAction;
         private TextProcessingAction? textProcessingAction;
         private BytesProcessingAction? bytesProcessingAction;
         private int? maxDegreeOfParallelism;
 
-        internal FileProcessor(string folderPath, FileReadMode readMode, FileSourceType? sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism)
+        internal FileProcessor(string folderPath, FileSourceType? sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism)
         {
             this.folderPath = folderPath;
-            this.readMode = readMode;
             this.sourceType = sourceType;
-            this.extensions = extensions;
-            this.fileFilter = fileFilter;
-            this.zipFileFilter = zipFileFilter;
+            this.includedExtensions = extensions;
+            this.includeFile = fileFilter;
+            this.includeZipFile = zipFileFilter;
             this.streamProcessingAction = streamProcessingAction;
             this.textProcessingAction = textProcessingAction;
             this.bytesProcessingAction = bytesProcessingAction;
@@ -42,51 +40,21 @@ namespace ArchiveFlow.FileProcessor
         {
             DirectoryInfo directory = new DirectoryInfo(folderPath);
 
-            foreach (var file in directory.EnumerateFiles("*", SearchOption.AllDirectories).Where(f => extensions.Contains(f.Extension)))
+            foreach (var file in directory.EnumerateFiles("*", SearchOption.AllDirectories).Where(f => includedExtensions.Contains(f.Extension)))
             {
                 FileInformation fileInfo = file.ToFileInformation();
-                if (fileFilter == null || fileFilter(file.ToFileInformation())) // inside filter?
+                if (includeFile == null || includeFile(file.ToFileInformation()))
                 {
                     using (Stream stream = file.OpenRead())
                     {
-                        if (!(streamProcessingAction is null))
-                        {
-                            streamProcessingAction?.Invoke(stream);
-                        }
-                        else if (readMode == FileReadMode.Text && !(textProcessingAction is null))
-                        {
-                            using (StreamReader reader = new StreamReader(stream))
-                            {
-                                textProcessingAction?.Invoke(reader.ReadToEnd());
-                            }
-                        }
-                        else if (readMode == FileReadMode.Binary && !(bytesProcessingAction is null))
-                        {
-                            byte[] bytes = new byte[stream.Length];
-                            stream.Read(bytes, 0, (int)stream.Length);
-                            bytesProcessingAction?.Invoke(bytes);
-                        }
+                        var streamProcessor = new StreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction); 
+                        streamProcessor.ProcessStream(stream);
                     }
 
 
-                    if (file.Extension.IsZipExtension() && (zipFileFilter == null || zipFileFilter(fileInfo))) // inside filter?
+                    if (file.Extension.IsZipExtension() && (includeZipFile == null || includeZipFile(fileInfo)))
                     {
-                        ProcessZipFile(file);
-                    }
-                }
-            }
-        }
-
-        private void ProcessZipFile(FileInfo zipFileInfo)
-        {
-            using (var archive = ArchiveFactory.Open(zipFileInfo.FullName))
-            {
-                foreach (var entry in archive.Entries)
-                {
-                    if (!entry.IsDirectory && extensions.Contains(Path.GetExtension(entry.Key).ToLower()) && (fileFilter == null || fileFilter(entry.ToFileInformation(zipFileInfo.LastWriteTime))))
-                    {
-                        // Process zip entry
-                        Console.WriteLine("Processing (file in) zip entry: " + entry.Key);
+                        IZipFileProcessor zipFileProcessor = new SharpCompressZipFileProcessor(includedExtensions, includeFile, streamProcessingAction, textProcessingAction, bytesProcessingAction);
                     }
                 }
             }

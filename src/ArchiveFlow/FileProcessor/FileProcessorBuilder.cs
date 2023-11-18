@@ -12,7 +12,6 @@ namespace ArchiveFlow.FileProcessor
     public class FileProcessorBuilder
     {
         private string folderPath = ".";
-        private FileReadMode readMode = FileReadMode.Text;
         private FileSourceType? sourceType = FileSourceType.Both;
         private List<string> extensions = new List<string>();
         private FileInformationFilter? fileFilter;
@@ -27,18 +26,6 @@ namespace ArchiveFlow.FileProcessor
             Guard.AgainstNull(nameof(path), path);
 
             folderPath = path;
-            return this;
-        }
-
-        public FileProcessorBuilder ReadAsText()
-        {
-            readMode = FileReadMode.Text;
-            return this;
-        }
-
-        public FileProcessorBuilder ReadAsBinary()
-        {
-            readMode = FileReadMode.Binary;
             return this;
         }
 
@@ -101,7 +88,7 @@ namespace ArchiveFlow.FileProcessor
 
         public FileProcessor Build()
         {
-            return new FileProcessor(folderPath, readMode, sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism);
+            return new FileProcessor(folderPath, sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism);
         }
     }
 }

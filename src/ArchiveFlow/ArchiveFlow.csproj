@@ -10,6 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ArchiveFlow.Tests"/>
+    <InternalsVisibleTo Include="ArchiveFlow.Tests" />
   </ItemGroup>
 </Project>
