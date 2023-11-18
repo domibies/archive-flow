@@ -8,9 +8,9 @@ using System.Text;
 
 namespace ArchiveFlow.Utilities
 {
-    public static class IArchiveEntryExtensions
+    internal static class IArchiveEntryExtensions
     {
-        public static FileInformation ToFileInformation(this IArchiveEntry zipEntry, DateTime defaultDateTime)
+        internal static FileInformation ToFileInformation(this IArchiveEntry zipEntry, DateTime defaultDateTime)
         {
             return new FileInformation(
                 zipEntry.Key,

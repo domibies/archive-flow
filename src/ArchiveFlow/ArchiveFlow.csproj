@@ -9,4 +9,7 @@
     <PackageReference Include="SharpCompress" Version="0.34.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ArchiveFlow.Tests"/>
+  </ItemGroup>
 </Project>

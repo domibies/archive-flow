@@ -9,11 +9,11 @@ using System.Text;
 
 namespace ArchiveFlow.Utilities
 {
-    public static class ZipExtension
+    internal static class ZipExtension
     {
         private static readonly List<string> zipExtensionsList = new List<string> { ".zip", ".rar", ".7z" };
 
-        public static bool IsZipExtension(this string extension)
+        internal static bool IsZipExtension(this string extension)
         {
             Guard.AgainstNull(nameof(extension), extension);
             Guard.AgainsNullOrWhiteSpace(nameof(extension), extension);
@@ -22,7 +22,7 @@ namespace ArchiveFlow.Utilities
             return zipExtensionsList.Any(s => s.Equals(extension, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static bool IsZipFile(this FileInformation file)
+        internal static bool IsZipFile(this FileInformation file)
         {
             return file.Extension.IsZipExtension();
         }

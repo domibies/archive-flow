@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ArchiveFlow.Utilities
 {
-    public static class FileInfoExtensions
+    internal static class FileInfoExtensions
     {
         public static FileInformation ToFileInformation(this FileInfo fileInfo)
         {

@@ -1,4 +1,5 @@
-﻿using ArchiveFlow.Models;
+﻿using ArchiveFlow.Common;
+using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,11 @@ namespace ArchiveFlow.FileProcessor
         private FileReadMode readMode = FileReadMode.Text;
         private FileSourceType? sourceType = FileSourceType.Both;
         private List<string> extensions = new List<string>();
-        private Func<FileInformation, bool>? fileFilter;
-        private Func<FileInformation, bool>? zipFileFilter;
-        private Action<Stream>? streamProcessingAction;
-        private Action<string>? textProcessingAction;
-        private Action<byte[]>? bytesProcessingAction;
+        private FileInformationFilter? fileFilter;
+        private FileInformationFilter? zipFileFilter;
+        private StreamProcessingAction? streamProcessingAction;
+        private TextProcessingAction? textProcessingAction;
+        private BytesProcessingAction? bytesProcessingAction;
         private int? maxDegreeOfParallelism;
 
         public FileProcessorBuilder FromFolder(string path)
@@ -50,23 +51,23 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
-        public FileProcessorBuilder Where(Func<FileInformation, bool> predicate)
+        public FileProcessorBuilder Where(FileInformationFilter filter)
         {
-            Guard.AgainstNull(nameof(predicate), predicate);
+            Guard.AgainstNull(nameof(filter), filter);
 
-            fileFilter = predicate;
+            fileFilter = filter;
             return this;
         }
 
-        public FileProcessorBuilder WhereZip(Func<FileInformation, bool> zipPredicate)
+        public FileProcessorBuilder WhereZip(FileInformationFilter filter)
         {
-            Guard.AgainstNull(nameof(zipPredicate), zipPredicate);
+            Guard.AgainstNull(nameof(filter), filter);
 
-            zipFileFilter = zipPredicate;
+            zipFileFilter = filter;
             return this;
         }
 
-        public FileProcessorBuilder ProcessStreamWith(Action<Stream> action)
+        public FileProcessorBuilder ProcessStreamWith(StreamProcessingAction action)
         {
             Guard.AgainstNull(nameof(action), action);
 
@@ -74,7 +75,7 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
-        public FileProcessorBuilder ProcessTextWith(Action<string> action)
+        public FileProcessorBuilder ProcessTextWith(TextProcessingAction action)
         {
             Guard.AgainstNull(nameof(action), action);
 
@@ -82,7 +83,7 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
-        public FileProcessorBuilder ProcessBytesWith(Action<byte[]> action)
+        public FileProcessorBuilder ProcessBytesWith(BytesProcessingAction action)
         {
             Guard.AgainstNull(nameof(action), action);
 

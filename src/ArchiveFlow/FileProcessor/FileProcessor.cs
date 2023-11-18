@@ -1,4 +1,6 @@
-﻿using ArchiveFlow.Models;
+﻿using ArchiveFlow.Abstractions;
+using ArchiveFlow.Common;
+using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
 using SharpCompress.Archives;
 using System;
@@ -8,21 +10,21 @@ using System.Linq;
 using System.Text;
 
 namespace ArchiveFlow.FileProcessor
-{
+{    
     public class FileProcessor
     {
         private string folderPath;
         private FileReadMode readMode = FileReadMode.Text;
         private FileSourceType? sourceType = FileSourceType.Both;
         private List<string> extensions = new List<string>();
-        private Func<FileInformation, bool>? fileFilter;
-        private Func<FileInformation, bool>? zipFileFilter;
-        private Action<Stream>? streamProcessingAction;
-        private Action<string>? textProcessingAction;
-        private Action<byte[]>? bytesProcessingAction;
+        private FileInformationFilter? fileFilter;
+        private FileInformationFilter? zipFileFilter;
+        private StreamProcessingAction? streamProcessingAction;
+        private TextProcessingAction? textProcessingAction;
+        private BytesProcessingAction? bytesProcessingAction;
         private int? maxDegreeOfParallelism;
 
-        public FileProcessor(string folderPath, FileReadMode readMode, FileSourceType? sourceType, List<string> extensions, Func<FileInformation, bool>? fileFilter, Func<FileInformation, bool>? zipFileFilter, Action<Stream>? streamProcessingAction, Action<string>? textProcessingAction, Action<byte[]>? bytesProcessingAction, int? maxDegreeOfParallelism)
+        internal FileProcessor(string folderPath, FileReadMode readMode, FileSourceType? sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism)
         {
             this.folderPath = folderPath;
             this.readMode = readMode;
@@ -42,12 +44,32 @@ namespace ArchiveFlow.FileProcessor
 
             foreach (var file in directory.EnumerateFiles("*", SearchOption.AllDirectories).Where(f => extensions.Contains(f.Extension)))
             {
-                if (fileFilter == null || fileFilter(file.ToFileInformation()))
+                FileInformation fileInfo = file.ToFileInformation();
+                if (fileFilter == null || fileFilter(file.ToFileInformation())) // inside filter?
                 {
-                    // Process file
-                    Console.WriteLine("Processing file: " + file.FullName);
+                    using (Stream stream = file.OpenRead())
+                    {
+                        if (!(streamProcessingAction is null))
+                        {
+                            streamProcessingAction?.Invoke(stream);
+                        }
+                        else if (readMode == FileReadMode.Text && !(textProcessingAction is null))
+                        {
+                            using (StreamReader reader = new StreamReader(stream))
+                            {
+                                textProcessingAction?.Invoke(reader.ReadToEnd());
+                            }
+                        }
+                        else if (readMode == FileReadMode.Binary && !(bytesProcessingAction is null))
+                        {
+                            byte[] bytes = new byte[stream.Length];
+                            stream.Read(bytes, 0, (int)stream.Length);
+                            bytesProcessingAction?.Invoke(bytes);
+                        }
+                    }
 
-                    if (file.Extension.IsZipExtension())
+
+                    if (file.Extension.IsZipExtension() && (zipFileFilter == null || zipFileFilter(fileInfo))) // inside filter?
                     {
                         ProcessZipFile(file);
                     }
