@@ -20,9 +20,9 @@ namespace ArchiveFlow.FileProcessor
         private StreamProcessingAction? streamProcessingAction;
         private TextProcessingAction? textProcessingAction;
         private BytesProcessingAction? bytesProcessingAction;
-        private ExceptionHandler? handleFileException;
+        private FileExceptionHandler? handleFileException;
 
-        public SingleFileProcessor(List<string> includedExtensions, FileInformationFilter? includeFile, FileInformationFilter? includeZipFile, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, ExceptionHandler? handleFileException)
+        public SingleFileProcessor(List<string> includedExtensions, FileInformationFilter? includeFile, FileInformationFilter? includeZipFile, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, FileExceptionHandler? handleFileException)
         {
             this.includedExtensions = includedExtensions;
             this.includeFile = includeFile;

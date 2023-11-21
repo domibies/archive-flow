@@ -21,7 +21,7 @@ namespace ArchiveFlow.FileProcessor
         private TextProcessingAction? textProcessingAction;
         private BytesProcessingAction? bytesProcessingAction;
         private int? maxDegreeOfParallelism;
-        private ExceptionHandler? handleFileException;
+        private FileExceptionHandler? handleFileException;
 
         public FileProcessorBuilder FromFolder(string path, RecurseOption recurse = RecurseOption.RecurseNo)
         {
@@ -96,7 +96,7 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
-        public FileProcessorBuilder HandleExceptionWith(ExceptionHandler handler)
+        public FileProcessorBuilder HandleExceptionWith(FileExceptionHandler handler)
         {
             Guard.AgainstNull(nameof(handler), handler);
 

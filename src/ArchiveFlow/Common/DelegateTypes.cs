@@ -9,5 +9,5 @@ namespace ArchiveFlow.Common
     public delegate void StreamProcessingAction(Stream stream);
     public delegate void TextProcessingAction(string text);
     public delegate void BytesProcessingAction(byte[] data);
-    public delegate bool ExceptionHandler(IFileInformation f, Exception ex);
+    public delegate bool FileExceptionHandler(IFileInformation f, Exception ex);
 }

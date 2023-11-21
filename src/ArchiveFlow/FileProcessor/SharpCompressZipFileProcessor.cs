@@ -20,7 +20,7 @@ namespace ArchiveFlow.FileProcessor
         private readonly StreamProcessingAction? streamProcessingAction;
         private readonly TextProcessingAction? textProcessingAction;
         private readonly BytesProcessingAction? bytesProcessingAction;
-        private readonly ExceptionHandler? handleFileException;
+        private readonly FileExceptionHandler? handleFileException;
 
 
         // Lambda to create IArchive from zip file name  
@@ -46,7 +46,7 @@ namespace ArchiveFlow.FileProcessor
             StreamProcessingAction? streamProcessingAction,
             TextProcessingAction? textProcessingAction,
             BytesProcessingAction? bytesProcessingAction,
-            ExceptionHandler? handleFileException = null,
+            FileExceptionHandler? handleFileException = null,
             Func<string, IArchive> ? createIArchive = null,
             Func<StreamProcessingAction?, TextProcessingAction?, BytesProcessingAction?, IStreamProcessor> ? createStreamProcessor = null)
         {

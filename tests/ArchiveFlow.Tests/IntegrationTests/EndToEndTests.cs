@@ -38,6 +38,7 @@ public class EndToEndTests
     [Fact]
     public void EndToEnd_Read100x100TxtFiles_InParalllel_Works()
     {
+        // MT safe.....
         var concurrentHashSet = new ConcurrentDictionary<int, byte>();
 
         //Prepare

@@ -24,9 +24,9 @@ namespace ArchiveFlow.FileProcessor
         private TextProcessingAction? textProcessingAction;
         private BytesProcessingAction? bytesProcessingAction;
         private int? maxDegreeOfParallelism;
-        private ExceptionHandler? handleFileException;
+        private FileExceptionHandler? handleFileException;
 
-        internal FileProcessor(string folderPath, RecurseOption recurseOption, FileSourceType? sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism, ExceptionHandler? handleFileException)
+        internal FileProcessor(string folderPath, RecurseOption recurseOption, FileSourceType? sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism, FileExceptionHandler? handleFileException)
         {
             this.folderPath = folderPath;
             this.recurseOption = recurseOption;
