@@ -14,7 +14,7 @@ namespace ArchiveFlow.FileProcessor
     public class FileProcessor
     {
         private string folderPath;
-        private FileSourceType? sourceType = FileSourceType.Both;
+        private FileSourceType? sourceType = FileSourceType.ZippedAndUnzipped;
         private List<string> includedExtensions = new List<string>();
         private FileInformationFilter? includeFile;
         private FileInformationFilter? includeZipFile;
@@ -40,9 +40,8 @@ namespace ArchiveFlow.FileProcessor
         {
             DirectoryInfo directory = new DirectoryInfo(folderPath);
 
-            foreach (var file in directory.EnumerateFiles("*", SearchOption.AllDirectories).Where(f => includedExtensions.Contains(f.Extension)))
+            foreach ((var file, var fileInfo) in directory.EnumerateFiles("*", SearchOption.AllDirectories).Where(f => includedExtensions.Contains(f.Extension)).Select(f => (f, f.ToFileInformation())))
             {
-                FileInformation fileInfo = file.ToFileInformation();
                 if (includeFile == null || includeFile(file.ToFileInformation()))
                 {
                     using (Stream stream = file.OpenRead())
@@ -55,8 +54,13 @@ namespace ArchiveFlow.FileProcessor
                     if (file.Extension.IsZipExtension() && (includeZipFile == null || includeZipFile(fileInfo)))
                     {
                         IZipFileProcessor zipFileProcessor = new SharpCompressZipFileProcessor(includedExtensions, includeFile, streamProcessingAction, textProcessingAction, bytesProcessingAction);
+                        zipFileProcessor.ProcessZipFile(file);  
                     }
                 }
+            }
+            foreach ((var file, var fileInfo) in directory.EnumerateFiles("*", SearchOption.AllDirectories).Where(f => includedExtensions.Contains(f.Extension)).Select(f => (f, f.ToFileInformation())))
+            {
+                // Code to be executed for each file and fileInfo
             }
         }
     }

@@ -11,9 +11,9 @@ namespace ArchiveFlow.FileProcessor
 {
     public class FileProcessorBuilder
     {
-        private string folderPath = ".";
-        private FileSourceType? sourceType = FileSourceType.Both;
-        private List<string> extensions = new List<string>();
+        private string? folderPath ;
+        private FileSourceType? sourceType;
+        private List<string> extensions = new List<string>() { "*" };
         private FileInformationFilter? fileFilter;
         private FileInformationFilter? zipFileFilter;
         private StreamProcessingAction? streamProcessingAction;
@@ -26,6 +26,12 @@ namespace ArchiveFlow.FileProcessor
             Guard.AgainstNull(nameof(path), path);
 
             folderPath = path;
+            return this;
+        }
+
+        public FileProcessorBuilder UseSource(FileSourceType type)
+        {
+            sourceType = type;
             return this;
         }
 
@@ -58,6 +64,9 @@ namespace ArchiveFlow.FileProcessor
         {
             Guard.AgainstNull(nameof(action), action);
 
+            if (textProcessingAction != null || bytesProcessingAction != null)
+                throw new InvalidOperationException("Cannot process, only one ProcessXXXWith() allowed.");
+
             streamProcessingAction = action;
             return this;
         }
@@ -66,6 +75,9 @@ namespace ArchiveFlow.FileProcessor
         {
             Guard.AgainstNull(nameof(action), action);
 
+            if (streamProcessingAction != null || bytesProcessingAction != null)
+                throw new InvalidOperationException("Cannot process, only one ProcessXXXWith() allowed.");
+
             textProcessingAction = action;
             return this;
         }
@@ -73,6 +85,9 @@ namespace ArchiveFlow.FileProcessor
         public FileProcessorBuilder ProcessBytesWith(BytesProcessingAction action)
         {
             Guard.AgainstNull(nameof(action), action);
+
+            if (streamProcessingAction != null || textProcessingAction != null)
+                throw new InvalidOperationException("Cannot process, only one ProcessXXXWith() allowed.");
 
             bytesProcessingAction = action;
             return this;
@@ -88,6 +103,15 @@ namespace ArchiveFlow.FileProcessor
 
         public FileProcessor Build()
         {
+            if (folderPath == null)
+                throw new InvalidOperationException("Cannot build, no FromFolder() defined.");
+
+            if (streamProcessingAction == null && textProcessingAction == null && bytesProcessingAction == null)
+                throw new InvalidOperationException("Cannot build, no ProcessXXXWith() defined.");
+
+            if (sourceType == null)
+                throw new InvalidOperationException("Cannot build, no UseSource() defined.");
+
             return new FileProcessor(folderPath, sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism);
         }
     }

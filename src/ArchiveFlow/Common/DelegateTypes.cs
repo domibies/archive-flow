@@ -1,4 +1,6 @@
 ﻿using ArchiveFlow.Abstractions;
+using ArchiveFlow.Models;
+using System;
 using System.IO;
 
 namespace ArchiveFlow.Common
@@ -7,4 +9,5 @@ namespace ArchiveFlow.Common
     public delegate void StreamProcessingAction(Stream stream);
     public delegate void TextProcessingAction(string text);
     public delegate void BytesProcessingAction(byte[] data);
+    public delegate bool HandleException(IFileInformation f, Exception ex);
 }

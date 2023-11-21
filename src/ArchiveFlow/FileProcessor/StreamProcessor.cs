@@ -55,9 +55,7 @@ namespace ArchiveFlow.FileProcessor
         {
             if (!(bytesProcessingAction is null))
             {
-                byte[] bytes = new byte[stream.Length];
-                stream.Read(bytes, 0, (int)stream.Length);
-                bytesProcessingAction?.Invoke(bytes);
+                bytesProcessingAction?.Invoke(stream.ReadAllBytes());
             }
         }
     }
