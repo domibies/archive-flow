@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -19,6 +20,8 @@ namespace ArchiveFlow.FileProcessor
         private readonly StreamProcessingAction? streamProcessingAction;
         private readonly TextProcessingAction? textProcessingAction;
         private readonly BytesProcessingAction? bytesProcessingAction;
+        private readonly ExceptionHandler? handleFileException;
+
 
         // Lambda to create IArchive from zip file name  
         private Func<string, IArchive> createIArchive = defaultCreateIArchive;
@@ -43,6 +46,7 @@ namespace ArchiveFlow.FileProcessor
             StreamProcessingAction? streamProcessingAction,
             TextProcessingAction? textProcessingAction,
             BytesProcessingAction? bytesProcessingAction,
+            ExceptionHandler? handleFileException = null,
             Func<string, IArchive> ? createIArchive = null,
             Func<StreamProcessingAction?, TextProcessingAction?, BytesProcessingAction?, IStreamProcessor> ? createStreamProcessor = null)
         {
@@ -51,6 +55,7 @@ namespace ArchiveFlow.FileProcessor
             this.streamProcessingAction = streamProcessingAction;
             this.textProcessingAction = textProcessingAction;
             this.bytesProcessingAction = bytesProcessingAction;
+            this.handleFileException = handleFileException;
 
             if (!(createIArchive is null))
                 this.createIArchive = createIArchive;
@@ -71,13 +76,24 @@ namespace ArchiveFlow.FileProcessor
 
         void ProcessZipEntry(IArchiveEntry entry, FileInfo zipFileInfo)
         {
-            if (!entry.IsDirectory && extensions.Contains(Path.GetExtension(entry.Key).ToLower()) && (fileFilter == null || fileFilter(entry.ToFileInformation(zipFileInfo.LastWriteTime))))
+            var fileInfo = entry.ToFileInformation(zipFileInfo.LastWriteTime);
+            if (!entry.IsDirectory && extensions.Contains(Path.GetExtension(entry.Key).ToLower()) && (fileFilter == null || fileFilter(fileInfo)))
             {
-                // open entry stream
-                using (Stream stream = entry.OpenEntryStream())
+                try
                 {
-                    var streamProcessor = createStreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction);
-                    streamProcessor.ProcessStream(stream);
+                    // open entry stream
+                    using (Stream stream = entry.OpenEntryStream())
+                    {
+                        var streamProcessor = createStreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction);
+                        streamProcessor.ProcessStream(stream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (handleFileException == null || !handleFileException(fileInfo, ex))
+                    {
+                        throw;
+                    }
                 }
             }
         }

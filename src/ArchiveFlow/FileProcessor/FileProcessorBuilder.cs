@@ -11,21 +11,24 @@ namespace ArchiveFlow.FileProcessor
 {
     public class FileProcessorBuilder
     {
-        private string? folderPath ;
+        private string? folderPath;
+        private RecurseOption recurseOption;
         private FileSourceType? sourceType;
-        private List<string> extensions = new List<string>() { "*" };
+        private List<string> extensions = new List<string>() { };
         private FileInformationFilter? fileFilter;
         private FileInformationFilter? zipFileFilter;
         private StreamProcessingAction? streamProcessingAction;
         private TextProcessingAction? textProcessingAction;
         private BytesProcessingAction? bytesProcessingAction;
         private int? maxDegreeOfParallelism;
+        private ExceptionHandler? handleFileException;
 
-        public FileProcessorBuilder FromFolder(string path)
+        public FileProcessorBuilder FromFolder(string path, RecurseOption recurse = RecurseOption.RecurseNo)
         {
             Guard.AgainstNull(nameof(path), path);
 
             folderPath = path;
+            recurseOption = recurse;
             return this;
         }
 
@@ -93,6 +96,14 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
+        public FileProcessorBuilder HandleExceptionWith(ExceptionHandler handler)
+        {
+            Guard.AgainstNull(nameof(handler), handler);
+
+            handleFileException = handler;
+            return this;
+        }
+
         public FileProcessorBuilder WithMaxDegreeOfParallelism(int maxDegree)
         {
             Guard.AgainstSmallerThan(nameof(maxDegree), maxDegree, 1);
@@ -112,7 +123,7 @@ namespace ArchiveFlow.FileProcessor
             if (sourceType == null)
                 throw new InvalidOperationException("Cannot build, no UseSource() defined.");
 
-            return new FileProcessor(folderPath, sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism);
+            return new FileProcessor(folderPath, recurseOption, sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism, handleFileException);
         }
     }
 }
