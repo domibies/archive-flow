@@ -48,7 +48,7 @@ namespace ArchiveFlow.FileProcessor
             if (maxDegreeOfParallelism != null && maxDegreeOfParallelism > 1)
             {
                 Parallel.ForEach(
-                    directory.EnumerateFiles("*", SearchOption.AllDirectories).Where(f => IsValidExtension(f.Extension)),
+                    directory.EnumerateFiles("*", recurseOption == RecurseOption.RecurseYes ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Where(f => IsValidExtension(f.Extension)),
                     new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? Environment.ProcessorCount },
                     (file) => GetSingleFileProcessor().ProcessFile(file));
             }
