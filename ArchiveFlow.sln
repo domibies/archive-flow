@@ -5,7 +5,13 @@ VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveFlow", "src\ArchiveFlow\ArchiveFlow.csproj", "{136FB867-D508-4018-9F20-71B755FF506B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveFlow.Tests", "tests\ArchiveFlow.Tests\ArchiveFlow.Tests.csproj", "{28F9B744-59A8-4031-A264-872F04D453A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveFlow.Tests", "tests\ArchiveFlow.Tests\ArchiveFlow.Tests.csproj", "{28F9B744-59A8-4031-A264-872F04D453A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C8EE33E3-AF92-45C8-82EF-6127AC6E240A}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
