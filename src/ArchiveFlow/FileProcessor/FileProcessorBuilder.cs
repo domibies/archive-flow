@@ -123,7 +123,7 @@ namespace ArchiveFlow.FileProcessor
             if (sourceType == null)
                 throw new InvalidOperationException("Cannot build, no UseSource() defined.");
 
-            return new FileProcessor(folderPath, recurseOption, sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism, handleFileException);
+            return new FileProcessor(folderPath, recurseOption, (FileSourceType)sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism, handleFileException);
         }
     }
 }

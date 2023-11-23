@@ -8,6 +8,11 @@ namespace ArchiveFlow.Utilities
         {
             Guard.AgainstNull(nameof(sourceType), sourceType);
 
+            return ((FileSourceType)sourceType).IncludesZipped();
+        }
+
+        public static bool IncludesZipped(this FileSourceType sourceType)
+        { 
             return sourceType == FileSourceType.Zipped || sourceType == FileSourceType.ZippedAndUnzipped;
         }
     }

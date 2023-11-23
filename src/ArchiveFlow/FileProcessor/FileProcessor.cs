@@ -16,7 +16,7 @@ namespace ArchiveFlow.FileProcessor
     {
         private string folderPath;
         private RecurseOption recurseOption;
-        private FileSourceType? sourceType = FileSourceType.ZippedAndUnzipped;
+        private FileSourceType sourceType;
         private List<string> includedExtensions = new List<string>();
         private FileInformationFilter? includeFile;
         private FileInformationFilter? includeZipFile;
@@ -26,7 +26,7 @@ namespace ArchiveFlow.FileProcessor
         private int? maxDegreeOfParallelism;
         private FileExceptionHandler? handleFileException;
 
-        internal FileProcessor(string folderPath, RecurseOption recurseOption, FileSourceType? sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism, FileExceptionHandler? handleFileException)
+        internal FileProcessor(string folderPath, RecurseOption recurseOption, FileSourceType sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism, FileExceptionHandler? handleFileException)
         {
             this.folderPath = folderPath;
             this.recurseOption = recurseOption;
@@ -71,7 +71,7 @@ namespace ArchiveFlow.FileProcessor
 
         private SingleFileProcessor GetSingleFileProcessor()
         {
-            return new SingleFileProcessor(includedExtensions, includeFile, includeZipFile, streamProcessingAction, textProcessingAction, bytesProcessingAction, handleFileException);
+            return new SingleFileProcessor(sourceType, includedExtensions, includeFile, includeZipFile, streamProcessingAction, textProcessingAction, bytesProcessingAction, handleFileException);
         }
     }
 }

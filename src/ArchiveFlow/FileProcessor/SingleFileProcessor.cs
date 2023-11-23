@@ -14,6 +14,8 @@ namespace ArchiveFlow.FileProcessor
 {
     public class SingleFileProcessor
     {
+        private int nestLevel = 0;
+        private FileSourceType sourceType;
         private List<string> includedExtensions;
         private FileInformationFilter? includeFile;
         private FileInformationFilter? includeZipFile;
@@ -22,8 +24,9 @@ namespace ArchiveFlow.FileProcessor
         private BytesProcessingAction? bytesProcessingAction;
         private FileExceptionHandler? handleFileException;
 
-        public SingleFileProcessor(List<string> includedExtensions, FileInformationFilter? includeFile, FileInformationFilter? includeZipFile, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, FileExceptionHandler? handleFileException)
+        public SingleFileProcessor(FileSourceType sourceType, List<string> includedExtensions, FileInformationFilter? includeFile, FileInformationFilter? includeZipFile, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, FileExceptionHandler? handleFileException)
         {
+            this.sourceType = sourceType;
             this.includedExtensions = includedExtensions;
             this.includeFile = includeFile;
             this.includeZipFile = includeZipFile;
@@ -33,34 +36,52 @@ namespace ArchiveFlow.FileProcessor
             this.handleFileException = handleFileException;
         }
 
+        internal enum HandleType
+        {
+            Nothing,
+            HandleZipFile,
+            HandleRegularFile,
+        }
+
         public void ProcessFile(FileInfo file)
         {
             var fileInfo = file.ToFileInformation();
-            if (includeFile == null || includeFile(fileInfo))
+
+            bool processAsZipFile = sourceType.IncludesZipped() && file.Extension.IsZipExtension();
+
+            var handleType = HandleType.Nothing;
+
+            if (processAsZipFile && (this.includeZipFile == null || this.includeZipFile(fileInfo)))
+                handleType = HandleType.HandleZipFile;
+
+            if (!processAsZipFile && includedExtensions.ContainsExtension(file.Extension) && (this.includeFile == null || this.includeFile(fileInfo)))
+                handleType = HandleType.HandleRegularFile;
+
+            try
             {
-                try
+                switch (handleType)
                 {
-                    if (includedExtensions.ContainsExtension(file.Extension))
-                    {
-                        using (Stream stream = file.OpenRead()) 
+                    case HandleType.HandleZipFile:
+                        IZipFileProcessor zipFileProcessor = new SharpCompressZipFileProcessor(includedExtensions, includeFile, streamProcessingAction, textProcessingAction, bytesProcessingAction, handleFileException);
+                        zipFileProcessor.ProcessZipFile(file);
+                        break;
+                    case HandleType.HandleRegularFile:
+                        using (Stream stream = file.OpenRead())
                         {
                             var streamProcessor = new StreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction);
                             streamProcessor.ProcessStream(stream);
                         }
-                    }
-
-                    if (file.Extension.IsZipExtension() && (includeZipFile == null || includeZipFile(fileInfo)))
-                    {
-                        IZipFileProcessor zipFileProcessor = new SharpCompressZipFileProcessor(includedExtensions, includeFile, streamProcessingAction, textProcessingAction, bytesProcessingAction, handleFileException);
-                        zipFileProcessor.ProcessZipFile(file);
-                    }
+                        break;
+                    default:
+                        // Do nothing
+                        break;
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                if (handleFileException == null || !handleFileException(fileInfo, ex))
                 {
-                    if (handleFileException == null || !handleFileException(fileInfo, ex))
-                    {
-                        throw;
-                    }
+                    throw;
                 }
             }
         }
