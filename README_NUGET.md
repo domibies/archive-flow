@@ -59,7 +59,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Dominique Biesmans - [https://www.linkedin.com/in/dominiquebiesmans/](LinkedIn) 
-
 Project Link: [https://github.com/domibies/ArchiveFlow](#)
 

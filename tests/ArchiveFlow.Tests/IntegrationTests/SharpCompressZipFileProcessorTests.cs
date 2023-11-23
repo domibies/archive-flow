@@ -2,7 +2,7 @@ using ArchiveFlow.FileProcessor;
 using FluentAssertions;
 using System.Text.RegularExpressions;
 
-namespace ArchiveFlow.Tests.FileProcessor
+namespace ArchiveFlow.Tests.IntegrationTests
 {
     public class SharpCompressZipFileProcessorTests
     {
@@ -57,7 +57,7 @@ namespace ArchiveFlow.Tests.FileProcessor
             processor.ProcessZipFile(new FileInfo(zipFilePath));
 
             // Assert
-            counter.Should().Be(totalNumberOfFiles_1000xXML/2);
+            counter.Should().Be(totalNumberOfFiles_1000xXML / 2);
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace ArchiveFlow.Tests.FileProcessor
                 null,
                 null,
                 null,
-                (b) => { counter++;  byteSize += b.Length;  });
+                (b) => { counter++; byteSize += b.Length; });
 
             // Act
             processor.ProcessZipFile(new FileInfo(zipFilePath));

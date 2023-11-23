@@ -7,7 +7,7 @@ using Xunit;
 using FluentAssertions;
 using SharpCompress.Archives;
 
-namespace ArchiveFlow.Tests.Utilities
+namespace ArchiveFlow.Tests.UnitTests
 {
     public class FileSystemInfoExtensionsTests
     {
@@ -19,10 +19,10 @@ namespace ArchiveFlow.Tests.Utilities
             DateTime defaultDateTime = DateTime.Now;
 
             // Act
-            var action = new Action(() => zipEntry!.ToFileInformation(defaultDateTime));    
+            var action = new Action(() => zipEntry!.ToFileInformation(defaultDateTime));
 
             // Assert
-            FluentActions.Invoking(action).Should().Throw<ArgumentNullException>(); 
+            FluentActions.Invoking(action).Should().Throw<ArgumentNullException>();
         }
     }
 }
