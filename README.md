@@ -18,7 +18,7 @@ ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped a
 To use ArchiveFlow in your project, add the following package to your dependencies:
 
 ```shell
-Install-Package ArchiveFlow -Version 1.0.0
+Install-Package ArchiveFlow
 ```
 
 ### Basic Usage
@@ -38,7 +38,6 @@ var builder =
         // Your processing logic here
     })
 
-// Act
 builder.Build().ProcessFiles();
 ```
 

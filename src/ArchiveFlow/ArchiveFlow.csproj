@@ -4,13 +4,25 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <Description> A robust .NET library offering a fluent API for efficient processing of files within zip archives.</Description>
-    <Copyright>(c) 2023 Dominique Biesmans</Copyright>
+    <Copyright>© 2023 Dominique Biesmans, DM Development</Copyright>
     <PackageProjectUrl>https://github.com/domibies/archive-flow</PackageProjectUrl>
     <PackageIcon>icon_128x128.png</PackageIcon>
     <Title>ArchiveFlow</Title>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/domibies/archive-flow</RepositoryUrl>
     <PackageTags>FluentAPI;FileProcessing;Archive;Unzip;FileIO</PackageTags>
+    <SignAssembly>False</SignAssembly>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RepositoryType>git</RepositoryType>
+    <FileVersion>1.0.0</FileVersion>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <PackageId>ArchiveFlow</PackageId>
+    <Authors>Dominique Biesmans</Authors>
+    <Company>DM Developement</Company>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,9 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="graphics\icon_128x128.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <None Update="icon_128x128.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		<Pack>True</Pack>
+		<PackagePath>/</PackagePath>
+	</None>
   </ItemGroup>
 </Project>

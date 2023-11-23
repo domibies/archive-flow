@@ -64,7 +64,7 @@ namespace ArchiveFlow.FileProcessor
         private bool IsValidExtension(string extension)
         {
             var compareExtensions = includedExtensions.Union(
-                sourceType == FileSourceType.Zipped || sourceType == FileSourceType.ZippedAndUnzipped ?
+                sourceType.IncludesZipped() ?
                 ZipExtension.List : new List<string>()).Distinct().ToList();
             return compareExtensions.ContainsExtension(extension);
         }

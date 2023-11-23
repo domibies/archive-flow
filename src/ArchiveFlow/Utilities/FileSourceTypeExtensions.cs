@@ -1,0 +1,14 @@
+﻿using ArchiveFlow.Models;
+
+namespace ArchiveFlow.Utilities
+{
+    internal static class FileSourceTypeExtensions
+    {
+        public static bool IncludesZipped(this FileSourceType? sourceType)
+        {
+            Guard.AgainstNull(nameof(sourceType), sourceType);
+
+            return sourceType == FileSourceType.Zipped || sourceType == FileSourceType.ZippedAndUnzipped;
+        }
+    }
+}

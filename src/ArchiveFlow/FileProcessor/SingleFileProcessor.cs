@@ -42,7 +42,7 @@ namespace ArchiveFlow.FileProcessor
                 {
                     if (includedExtensions.ContainsExtension(file.Extension))
                     {
-                        using (Stream stream = file.OpenRead())
+                        using (Stream stream = file.OpenRead()) 
                         {
                             var streamProcessor = new StreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction);
                             streamProcessor.ProcessStream(stream);

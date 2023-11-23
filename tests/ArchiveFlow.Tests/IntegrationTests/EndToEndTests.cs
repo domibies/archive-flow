@@ -31,6 +31,9 @@ public class EndToEndTests
         // Act
         builder.Build().ProcessFiles();
 
+        // Assert
+        // In the dictionary we expect all the numbers from 1 to 10000
+        // because we have 10000 files with 1 number each, spread over 100 zip files
         allContent.Should().BeEquivalentTo(Enumerable.Range(1, 10000));
 
     }
@@ -57,6 +60,7 @@ public class EndToEndTests
         // Act
         builder.Build().ProcessFiles();
 
+        // Assert
         concurrentHashSet.Keys.Should().BeEquivalentTo(Enumerable.Range(1, 10000));
 
     }
