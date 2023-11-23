@@ -15,5 +15,10 @@ namespace ArchiveFlow.Utilities
         { 
             return sourceType == FileSourceType.Zipped || sourceType == FileSourceType.ZippedAndUnzipped;
         }
+
+        public static bool IncludesUnzipped(this FileSourceType sourceType)
+        {
+            return sourceType == FileSourceType.Unzipped || sourceType == FileSourceType.ZippedAndUnzipped;
+        }
     }
 }
