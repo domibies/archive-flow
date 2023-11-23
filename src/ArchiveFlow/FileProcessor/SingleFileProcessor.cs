@@ -14,7 +14,7 @@ namespace ArchiveFlow.FileProcessor
 {
     public class SingleFileProcessor
     {
-        private int nestLevel = 0;
+        //private int nestLevel = 0;
         private FileSourceType sourceType;
         private List<string> includedExtensions;
         private FileInformationFilter? includeFile;

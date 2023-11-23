@@ -99,7 +99,8 @@ namespace ArchiveFlow.FileProcessor
 
         private void HandleRegularFile(FileInformation file, Stream openStream)
         {
-            throw new NotImplementedException();
+            var streamProcessor = new StreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction);
+            streamProcessor.ProcessStream(openStream);
         }
 
         private void HandleZipFile(FileInformation file, Stream openStream)
