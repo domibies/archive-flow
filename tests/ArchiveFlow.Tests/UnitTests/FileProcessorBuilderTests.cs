@@ -42,12 +42,12 @@ namespace ArchiveFlow.Tests.UnitTests
         }
 
         [Fact]
-        public void Where_NullPath_ThrowsArgumentNullException()
+        public void Where_Filter_NullPath_ThrowsArgumentNullException()
         {
             var builder = new FileProcessorBuilder();
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action where = () => builder.Where(null);
+            Action where = () => builder.WhereFile(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             // Act & Assert
@@ -56,12 +56,12 @@ namespace ArchiveFlow.Tests.UnitTests
 
         // test that WhereZip throws
         [Fact]
-        public void WhereZip_NullPath_ThrowsArgumentNullException()
+        public void FromZipWhere_Filter_NullPath_ThrowsArgumentNullException()
         {
             var builder = new FileProcessorBuilder();
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action whereZip = () => builder.WhereZip(null);
+            Action whereZip = () => builder.FromZipWhere(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             // Act & Assert
@@ -71,11 +71,11 @@ namespace ArchiveFlow.Tests.UnitTests
         // ProcessStreamWith
 
         [Fact]
-        public void ProcessStreamWith_NullPath_ThrowsArgumentNullException()
+        public void SetStreamProcessingAction_NullPath_ThrowsArgumentNullException()
         {
             var builder = new FileProcessorBuilder();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action processStreamWith = () => builder.ProcessStreamWith(null);
+            Action processStreamWith = () => builder.ProcessAsText(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             // Act & Assert
@@ -83,22 +83,22 @@ namespace ArchiveFlow.Tests.UnitTests
         }
 
         [Fact]
-        public void ProcessStreamWith_AfterOtherProcess_ThrowsInvalidOperationException()
+        public void SetStreamProcessingAction_AfterOtherProcess_Build_ThrowsInvalidOperationException()
         {
             var builder = new FileProcessorBuilder();
-            builder.ProcessTextWith((t) => { });
-            Action processStreamWith = () => builder.ProcessStreamWith((s) => { });
+            builder.ProcessAsText((t) => { });
+            builder.ProcessAsStream((s) => { });
 
             // Act & Assert
-            FluentActions.Invoking(processStreamWith).Should().Throw<InvalidOperationException>();
+            FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void ProcessTextWith_NullPath_ThrowsArgumentNullException()
+        public void SetTextProcessingAction_NullPath_ThrowsArgumentNullException()
         {
             var builder = new FileProcessorBuilder();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action processTextWith = () => builder.ProcessTextWith(null);
+            Action processTextWith = () => builder.ProcessAsText(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             // Act & Assert
@@ -106,22 +106,22 @@ namespace ArchiveFlow.Tests.UnitTests
         }
 
         [Fact]
-        public void ProcessTextWith_AfterOtherProcessWith_ThrowsInvalidOperationException()
+        public void SetTextProcessingAction_AfterOtherProcessWith_Build_ThrowsInvalidOperationException()
         {
             var builder = new FileProcessorBuilder();
-            builder.ProcessBytesWith((b) => { });
-            Action processTextWith = () => builder.ProcessTextWith((t) => { });
+            builder.ProcessAsBytes((b) => { });
+            builder.ProcessAsText((t) => { });
 
             // Act & Assert
-            FluentActions.Invoking(processTextWith).Should().Throw<InvalidOperationException>();
+            FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void ProcessBytesWith_NullPath_ThrowsArgumentNullException()
+        public void SetBytesProcessingAction_NullPath_ThrowsArgumentNullException()
         {
             var builder = new FileProcessorBuilder();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action processBytesWith = () => builder.ProcessBytesWith(null);
+            Action processBytesWith = () => builder.ProcessAsBytes(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             // Act & Assert
@@ -129,14 +129,14 @@ namespace ArchiveFlow.Tests.UnitTests
         }
 
         [Fact]
-        public void ProcessBytesWith_AfterOtherProcessWith_ThrowsInvalidOperationException()
+        public void SetBytesProcessingAction_AfterOtherProcessWith_ThrowsInvalidOperationException()
         {
             var builder = new FileProcessorBuilder();
-            builder.ProcessStreamWith((s) => { });
-            Action processBytesWith = () => builder.ProcessBytesWith((t) => { });
+            builder.ProcessAsText((s) => { });
+            builder.ProcessAsBytes((t) => { });
 
             // Act & Assert
-            FluentActions.Invoking(processBytesWith).Should().Throw<InvalidOperationException>();
+            FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -146,33 +146,34 @@ namespace ArchiveFlow.Tests.UnitTests
             FileProcessorBuilder builder = new FileProcessorBuilder();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => builder.Build());
+            FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void Build_WhenNoProcessXXXWithDefined_ThrowsInvalidOperationException()
+        public void Build_WhenNoProcessingActionDefined_ThrowsInvalidOperationException()
         {
             // Arrange
             FileProcessorBuilder builder = new FileProcessorBuilder()
                 .FromFolder("path")
-                .UseSource(FileSourceType.ZippedAndUnzipped)
-                .FilterByExtension(".txt");
+                .SetArchiveSearch(ArchiveSearch.SearchInAndOutsideArchives)
+                .WithExtension(".txt");
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => builder.Build());
         }
 
         [Fact]
-        public void Build_WhenNoUseSourceDefined_ThrowsInvalidOperationException()
+        public void Build_WhenNoSourceDefined_ShouldntThrow()
         {
             // Arrange
             FileProcessorBuilder builder = new FileProcessorBuilder()
                 .FromFolder("path")
-                .FilterByExtension(".txt")
-                .ProcessTextWith((t) => { });
+                .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
+                .WithExtension(".txt")
+                .ProcessAsText((t) => { });
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => builder.Build());
+            FluentActions.Invoking(() => builder.Build()).Should().NotThrow();
         }
 
         [Fact]
@@ -181,8 +182,8 @@ namespace ArchiveFlow.Tests.UnitTests
             // Arrange
             FileProcessorBuilder builder = new FileProcessorBuilder()
                 .FromFolder("path")
-                .UseSource(FileSourceType.ZippedAndUnzipped)
-                .ProcessTextWith((t) => { });
+                .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
+                .ProcessAsText((t) => { });
 
             // Act
             var processor = builder.Build();

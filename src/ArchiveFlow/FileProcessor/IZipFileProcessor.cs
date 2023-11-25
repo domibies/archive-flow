@@ -1,7 +1,8 @@
+using ArchiveFlow.Models;
 using System.IO;
 
 interface IZipFileProcessor
 {
-    void ProcessZipFile(FileInfo zipFileInfo);
+    void ProcessZipFile(FileInformation zipFileInfo, Stream? stream = null);
 }
 

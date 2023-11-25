@@ -5,6 +5,7 @@ using ArchiveFlow.Utilities;
 using SharpCompress.Archives;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,20 +16,23 @@ namespace ArchiveFlow.FileProcessor
 {
     internal class SharpCompressZipFileProcessor : IZipFileProcessor
     {
-        private readonly IEnumerable<string> extensions;
-        private readonly FileInformationFilter? fileFilter;
-        private readonly StreamProcessingAction? streamProcessingAction;
-        private readonly TextProcessingAction? textProcessingAction;
-        private readonly BytesProcessingAction? bytesProcessingAction;
-        private readonly FileExceptionHandler? handleFileException;
-
+        private readonly ProcessorConfig config;
 
         // Lambda to create IArchive from zip file name  
-        private Func<string, IArchive> createIArchive = defaultCreateIArchive;
+        private Func<string?, Stream?, IArchive> createIArchive = defaultCreateIArchive;
 
-        private static IArchive defaultCreateIArchive(string zipFullName)
+        private static IArchive defaultCreateIArchive(string? zipFullName, Stream? stream)
         {
-            return ArchiveFactory.Open(zipFullName);
+            if (zipFullName == null && stream == null)
+                throw new ArgumentException("Either zipFullName or stream must be provided");
+
+            if (zipFullName != null && stream != null)
+                throw new ArgumentException("Only one of zipFullName or stream must be provided");
+
+            if (zipFullName != null)
+                return ArchiveFactory.Open(zipFullName);
+            else
+                return ArchiveFactory.Open(stream!);
         }
 
         // Lambda to create a streamProcessor
@@ -41,21 +45,11 @@ namespace ArchiveFlow.FileProcessor
 
 
         internal SharpCompressZipFileProcessor(
-            IEnumerable<string> extensions,
-            FileInformationFilter? fileFilter,
-            StreamProcessingAction? streamProcessingAction,
-            TextProcessingAction? textProcessingAction,
-            BytesProcessingAction? bytesProcessingAction,
-            FileExceptionHandler? handleFileException = null,
-            Func<string, IArchive> ? createIArchive = null,
+            ProcessorConfig config,
+            Func<string?, Stream?, IArchive> ? createIArchive = null,
             Func<StreamProcessingAction?, TextProcessingAction?, BytesProcessingAction?, IStreamProcessor> ? createStreamProcessor = null)
         {
-            this.extensions = extensions;
-            this.fileFilter = fileFilter;
-            this.streamProcessingAction = streamProcessingAction;
-            this.textProcessingAction = textProcessingAction;
-            this.bytesProcessingAction = bytesProcessingAction;
-            this.handleFileException = handleFileException;
+            this.config = config;
 
             if (!(createIArchive is null))
                 this.createIArchive = createIArchive;
@@ -63,40 +57,29 @@ namespace ArchiveFlow.FileProcessor
                 this.createStreamProcessor = createStreamProcessor; 
         }
 
-        public void ProcessZipFile(FileInfo zipFileInfo)
+        public void ProcessZipFile(FileInformation zipFileInfo, Stream? stream = null)
         {
-            using (var archive = createIArchive(zipFileInfo.FullName))
+            if (stream is null && zipFileInfo.InArchive)
+                throw new InvalidOperationException("A nested archive can only be opened via stream.");
+
+
+            using (var archive = createIArchive(stream is null ? Path.Combine(zipFileInfo.Volume, zipFileInfo.FileName) : null, stream))
             {
-                foreach(var entry in archive.Entries)
+
+                foreach(var entry in archive.Entries.Where((e) => e.IsDirectory == false))
                 {
-                    ProcessZipEntry(entry, zipFileInfo);
+                    new SingleEntryProcessor(config)
+                        .ProcessEntry(entry.ToFileInformation(zipFileInfo), entry.OpenEntryStream());
                 }   
             }
         }
 
-        void ProcessZipEntry(IArchiveEntry entry, FileInfo zipFileInfo)
+        void ProcessZipEntry(IArchiveEntry entry, FileInformation zipFileInfo)
         {
-            var fileInfo = entry.ToFileInformation(zipFileInfo.LastWriteTime);
-            if (!entry.IsDirectory && extensions.Contains(Path.GetExtension(entry.Key).ToLower()) && (fileFilter == null || fileFilter(fileInfo)))
-            {
-                try
-                {
-                    // open entry stream
-                    using (Stream stream = entry.OpenEntryStream())
-                    {
-                        var streamProcessor = createStreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction);
-                        streamProcessor.ProcessStream(stream);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (handleFileException == null || !handleFileException(fileInfo, ex))
-                    {
-                        throw;
-                    }
-                }
-            }
+            var processor = new SingleEntryProcessor(config);
+            processor.ProcessEntry(entry.ToFileInformation(zipFileInfo), entry.OpenEntryStream());
         }
+
 
     }
 }

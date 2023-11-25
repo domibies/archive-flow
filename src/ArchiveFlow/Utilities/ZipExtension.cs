@@ -11,7 +11,7 @@ namespace ArchiveFlow.Utilities
 {
     internal static class ZipExtension
     {
-        private static readonly List<string> zipExtensionsList = new List<string> { ".zip", ".rar", ".7z" };
+        private static readonly List<string> zipExtensionsList = new List<string> { ".zip", ".rar", ".7z", ".tar" };
         public static IList<string> List => zipExtensionsList;
 
         internal static bool IsZipExtension(this string extension)

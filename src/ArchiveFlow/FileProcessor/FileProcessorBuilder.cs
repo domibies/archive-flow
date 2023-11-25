@@ -3,6 +3,7 @@ using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using static System.Collections.Specialized.BitVector32;
@@ -12,33 +13,33 @@ namespace ArchiveFlow.FileProcessor
     public class FileProcessorBuilder
     {
         private string? folderPath;
-        private RecurseOption recurseOption;
-        private FileSourceType? sourceType;
+        private FolderSelect folderSelect = default;
+        private ArchiveSearch archiveSearch = default;
         private List<string> extensions = new List<string>() { };
         private FileInformationFilter? fileFilter;
         private FileInformationFilter? zipFileFilter;
         private StreamProcessingAction? streamProcessingAction;
         private TextProcessingAction? textProcessingAction;
         private BytesProcessingAction? bytesProcessingAction;
-        private int? maxDegreeOfParallelism;
         private FileExceptionHandler? handleFileException;
+        private int? maxDegreeOfParallelism;
 
-        public FileProcessorBuilder FromFolder(string path, RecurseOption recurse = RecurseOption.RecurseNo)
+        public FileProcessorBuilder FromFolder(string path, FolderSelect folderSelect = FolderSelect.RootFolderOny)
         {
             Guard.AgainstNull(nameof(path), path);
 
-            folderPath = path;
-            recurseOption = recurse;
+            this.folderPath = path;
+            this.folderSelect = folderSelect;
             return this;
         }
 
-        public FileProcessorBuilder UseSource(FileSourceType type)
+        public FileProcessorBuilder SetArchiveSearch(ArchiveSearch type)
         {
-            sourceType = type;
+            archiveSearch = type;
             return this;
         }
 
-        public FileProcessorBuilder FilterByExtension(params string[] exts)
+        public FileProcessorBuilder WithExtension(params string[] exts)
         {
             Guard.AgainstNull(nameof(exts), exts);
             Guard.AgainstSmallerThan(nameof(exts.Length), exts.Length, 1);
@@ -47,7 +48,7 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
-        public FileProcessorBuilder Where(FileInformationFilter filter)
+        public FileProcessorBuilder WhereFile(FileInformationFilter filter)
         {
             Guard.AgainstNull(nameof(filter), filter);
 
@@ -55,7 +56,7 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
-        public FileProcessorBuilder WhereZip(FileInformationFilter filter)
+        public FileProcessorBuilder FromZipWhere(FileInformationFilter filter)
         {
             Guard.AgainstNull(nameof(filter), filter);
 
@@ -63,34 +64,25 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
-        public FileProcessorBuilder ProcessStreamWith(StreamProcessingAction action)
+        public FileProcessorBuilder ProcessAsStream(StreamProcessingAction action)
         {
             Guard.AgainstNull(nameof(action), action);
-
-            if (textProcessingAction != null || bytesProcessingAction != null)
-                throw new InvalidOperationException("Cannot process, only one ProcessXXXWith() allowed.");
 
             streamProcessingAction = action;
             return this;
         }
 
-        public FileProcessorBuilder ProcessTextWith(TextProcessingAction action)
+        public FileProcessorBuilder ProcessAsText(TextProcessingAction action)
         {
             Guard.AgainstNull(nameof(action), action);
-
-            if (streamProcessingAction != null || bytesProcessingAction != null)
-                throw new InvalidOperationException("Cannot process, only one ProcessXXXWith() allowed.");
 
             textProcessingAction = action;
             return this;
         }
 
-        public FileProcessorBuilder ProcessBytesWith(BytesProcessingAction action)
+        public FileProcessorBuilder ProcessAsBytes(BytesProcessingAction action)
         {
             Guard.AgainstNull(nameof(action), action);
-
-            if (streamProcessingAction != null || textProcessingAction != null)
-                throw new InvalidOperationException("Cannot process, only one ProcessXXXWith() allowed.");
 
             bytesProcessingAction = action;
             return this;
@@ -112,18 +104,41 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
+        private ProcessorConfig GetConfig()
+        {
+            return new ProcessorConfig(
+                               folderPath: folderPath ?? "",
+                               folderSelect: folderSelect,
+                               archiveSearch: archiveSearch,
+                               includedExtensions: extensions,
+                               fileFilter: fileFilter,
+                               zipFileFilter: zipFileFilter,
+                               streamProcessingAction: streamProcessingAction,
+                               textProcessingAction: textProcessingAction,
+                               bytesProcessingAction: bytesProcessingAction,
+                               handleFileException: handleFileException,
+                               maxDegreeOfParallelism: maxDegreeOfParallelism);
+        }
+
         public FileProcessor Build()
         {
             if (folderPath == null)
                 throw new InvalidOperationException("Cannot build, no FromFolder() defined.");
 
             if (streamProcessingAction == null && textProcessingAction == null && bytesProcessingAction == null)
-                throw new InvalidOperationException("Cannot build, no ProcessXXXWith() defined.");
+                throw new InvalidOperationException("Cannot build, no ProcessAsXXX() defined.");
 
-            if (sourceType == null)
-                throw new InvalidOperationException("Cannot build, no UseSource() defined.");
+            int actionCount = 0;
+            actionCount += streamProcessingAction != null ? 1 : 0;
+            actionCount += textProcessingAction != null ? 1 : 0;
+            actionCount += bytesProcessingAction != null ? 1 : 0;
 
-            return new FileProcessor(folderPath, recurseOption, (FileSourceType)sourceType, extensions, fileFilter, zipFileFilter, streamProcessingAction, textProcessingAction, bytesProcessingAction, maxDegreeOfParallelism, handleFileException);
+            if (actionCount > 1)
+            {
+                throw new InvalidOperationException("Cannot build, more than one ProcessAsXXX() defined.");
+            }
+
+            return new FileProcessor(GetConfig());
         }
     }
 }

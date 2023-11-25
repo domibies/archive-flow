@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ArchiveFlow.Models
 {
-    public enum RecurseOption
+    public enum FolderSelect
     {
-        RecurseYes,
-        RecurseNo
+        RootFolderOny,
+        RootAndSubFolders
     }
 }

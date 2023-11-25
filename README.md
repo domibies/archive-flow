@@ -1,4 +1,4 @@
-# ArchiveFlow
+# ![Logo](src/ArchiveFlow/icon_128x128.png) ArchiveFlow
 
 ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped and unzipped file archives. It lets you focus on processing logic instead of file/zip handling code.
 
@@ -10,6 +10,7 @@ ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped a
 - Options for reading files as text, binary, or streams.
 - Parallel processing capabilities with configurable degrees of parallelism.
 - Extensible design for future enhancements.
+- Exception handling for robust processing.
 
 ## Getting Started
 
@@ -21,27 +22,25 @@ To use ArchiveFlow in your project, add the following package to your dependenci
 Install-Package ArchiveFlow
 ```
 
-### Basic Usage
+### Usage
 
-Here's a quick example to get you started with ArchiveFlow:
+#### Basic Example
+
+Here's a the most basic example to get you started with ArchiveFlow. This will process all files as text file in archive files in the specified folder. The default behaviour is to all entires in archive files in the folder (non-recursive), and ignore non archive files.
 
 ```csharp
 using ArchiveFlow;
 
-var builder =
-    new FileProcessorBuilder()
-    .FromFolder("./your/folder")
-    .UseSource(FileSourceType.Zipped)
-    .FilterByExtension(".txt")
-    .ProcessTextWith((t) =>
+var builder = new FileProcessorBuilder()
+    .FromFolder("./your/path")
+    .ProcessAsText((t) =>
     {
-        // Your processing logic here
+        // Your text processing logic here
     })
 
 builder.Build().ProcessFiles();
 ```
-
-
+   
 ## Contributing
 
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.

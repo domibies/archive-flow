@@ -14,7 +14,7 @@
     <SignAssembly>False</SignAssembly>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <RepositoryType>git</RepositoryType>
-    <FileVersion>1.0.0</FileVersion>
+    <FileVersion>0.9.0</FileVersion>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -23,8 +23,14 @@
     <PackageId>ArchiveFlow</PackageId>
     <Authors>Dominique Biesmans</Authors>
     <Company>DM Developement</Company>
+    <AssemblyVersion>0.9.0</AssemblyVersion>
+    <Version>0.9.0</Version>
   </PropertyGroup>
-
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="SharpCompress" Version="0.34.2" />
   </ItemGroup>

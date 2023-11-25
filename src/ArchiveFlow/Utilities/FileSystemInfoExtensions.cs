@@ -13,6 +13,7 @@ namespace ArchiveFlow.Utilities
             Guard.AgainstNull(nameof(fileSystemInfo), fileSystemInfo);
 
             return new FileInformation(
+                Path.GetDirectoryName(fileSystemInfo.FullName),
                 fileSystemInfo.Name, 
                 fileSystemInfo.Extension, 
                 fileSystemInfo is FileInfo ? ((FileInfo)fileSystemInfo).Length : 0, 

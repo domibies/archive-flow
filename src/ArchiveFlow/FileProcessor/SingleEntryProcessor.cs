@@ -1,60 +1,42 @@
-﻿using ArchiveFlow.Common;
-using ArchiveFlow.Models;
+﻿using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 
 namespace ArchiveFlow.FileProcessor
 {
     internal class SingleEntryProcessor
     {
-        private int nestLevel;
-        private FileSourceType sourceType;
-        private List<string> includedExtensions;
-        private FileInformationFilter? includeFile;
-        private FileInformationFilter? includeZipFile;
-        private StreamProcessingAction? streamProcessingAction;
-        private TextProcessingAction? textProcessingAction;
-        private BytesProcessingAction? bytesProcessingAction;
-        private FileExceptionHandler? handleFileException;
+        private readonly ProcessorConfig config;
 
-        public SingleEntryProcessor(int nestLevel, FileSourceType sourceType, List<string> includedExtensions, FileInformationFilter? includeFile, FileInformationFilter? includeZipFile, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, FileExceptionHandler? handleFileException)
+        public SingleEntryProcessor(ProcessorConfig config)
         {
-            this.nestLevel = nestLevel;
-            this.sourceType = sourceType;
-            this.includedExtensions = includedExtensions;
-            this.includeFile = includeFile;
-            this.includeZipFile = includeZipFile;
-            this.streamProcessingAction = streamProcessingAction;
-            this.textProcessingAction = textProcessingAction;
-            this.bytesProcessingAction = bytesProcessingAction;
-            this.handleFileException = handleFileException;
+            this.config = config;
         }
 
         internal enum HandleType
         {
-            Nothing,
-            HandleZip,
-            HandleNonZip,
+            SkipIt,
+            HandleAsAZipFile,
+            HandleAsARegularFile,
         }
 
 
         public void ProcessEntry(FileInformation file, Stream openStream)
         {
 
-            HandleType handleType = GetHandleType(file);
+            HandleType handleType = HowToHandle(file);
 
             try
             {
                 switch (handleType)
                 {
-                    case HandleType.HandleZip:
-                        HandleZipFile(file, openStream);
+                    case HandleType.HandleAsAZipFile:
+                        HandleAsAZipFile(file, openStream);
                         break;
-                    case HandleType.HandleNonZip:
-                        HandleRegularFile(file, openStream);
+                    case HandleType.HandleAsARegularFile:
+                        HandleAsARegularFile(file, openStream);
                         break;
                     default:
                         break;
@@ -62,50 +44,61 @@ namespace ArchiveFlow.FileProcessor
             }
             catch (Exception ex)
             {
-                if (handleFileException != null)
-                {
-                    handleFileException(file, ex);
-                }
-                else
-                {
+                if (config.HandleFileException == null || !config.HandleFileException(file, ex))
                     throw;
-                }
             }
         }
 
-        private HandleType GetHandleType(FileInformation file)
+        private HandleType HowToHandle(FileInformation file)
         {
-            var handleType = HandleType.Nothing;
+            var handleType = HandleType.SkipIt;
 
-            bool processAsZipFile = sourceType.IncludesZipped() && file.Extension.IsZipExtension();
+            bool processAsZipFile = config.ArchiveSearch.IncludesZipped() && file.Extension.IsZipExtension();
 
             if (processAsZipFile &&
-                (this.includeZipFile == null || this.includeZipFile(file)))
+                (config.ZipFileFilter == null || config.ZipFileFilter(file)))
             {
-                handleType = HandleType.HandleZip;
+                handleType = HandleType.HandleAsAZipFile;
             }
 
+            bool includeExtension =
+                !config.IncludedExtensions.Any() ||
+                config.IncludedExtensions.Any(ext => ext.Equals(file.Extension, StringComparison.OrdinalIgnoreCase));
+
+
             if (!processAsZipFile &&
-                (sourceType.IncludesUnzipped() || nestLevel > 0) &&
-                includedExtensions.ContainsExtension(file.Extension) &&
-                (this.includeFile == null || this.includeFile(file)))
+                (config.ArchiveSearch.IncludesUnzipped() || file.InArchive) &&
+                includeExtension &&
+                (config.FileFilter == null || config.FileFilter(file)))
             {
-                handleType = HandleType.HandleNonZip;
+                handleType = HandleType.HandleAsARegularFile;
             }
 
             return handleType;
         }
 
 
-        private void HandleRegularFile(FileInformation file, Stream openStream)
+        private void HandleAsARegularFile(FileInformation file, Stream openStream)
         {
-            var streamProcessor = new StreamProcessor(streamProcessingAction, textProcessingAction, bytesProcessingAction);
+            var streamProcessor = new StreamProcessor(config.StreamProcessingAction, config.TextProcessingAction, config.BytesProcessingAction);
             streamProcessor.ProcessStream(openStream);
         }
 
-        private void HandleZipFile(FileInformation file, Stream openStream)
+        private void HandleAsAZipFile(FileInformation file, Stream openStream)
         {
-            throw new NotImplementedException();
+            var zipFileProcessor = new SharpCompressZipFileProcessor(config);
+
+            if (!openStream.CanSeek)
+            {
+                var memoryStream = new MemoryStream();
+
+                openStream.CopyTo(memoryStream);
+                openStream.Dispose();
+                openStream = memoryStream;
+                openStream.Seek(0, SeekOrigin.Begin);
+            }                
+            
+            zipFileProcessor.ProcessZipFile(file, openStream);            
         }
     }
 }

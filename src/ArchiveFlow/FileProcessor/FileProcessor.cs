@@ -5,6 +5,7 @@ using ArchiveFlow.Utilities;
 using SharpCompress.Archives;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,64 +15,40 @@ namespace ArchiveFlow.FileProcessor
 {    
     public class FileProcessor
     {
-        private string folderPath;
-        private RecurseOption recurseOption;
-        private FileSourceType sourceType;
-        private List<string> includedExtensions = new List<string>();
-        private FileInformationFilter? includeFile;
-        private FileInformationFilter? includeZipFile;
-        private StreamProcessingAction? streamProcessingAction;
-        private TextProcessingAction? textProcessingAction;
-        private BytesProcessingAction? bytesProcessingAction;
-        private int? maxDegreeOfParallelism;
-        private FileExceptionHandler? handleFileException;
+        private readonly ProcessorConfig config;
 
-        internal FileProcessor(string folderPath, RecurseOption recurseOption, FileSourceType sourceType, List<string> extensions, FileInformationFilter? fileFilter, FileInformationFilter? zipFileFilter, StreamProcessingAction? streamProcessingAction, TextProcessingAction? textProcessingAction, BytesProcessingAction? bytesProcessingAction, int? maxDegreeOfParallelism, FileExceptionHandler? handleFileException)
+        internal FileProcessor(ProcessorConfig config)
         {
-            this.folderPath = folderPath;
-            this.recurseOption = recurseOption;
-            this.sourceType = sourceType;
-            this.includedExtensions = extensions;
-            this.includeFile = fileFilter;
-            this.includeZipFile = zipFileFilter;
-            this.streamProcessingAction = streamProcessingAction;
-            this.textProcessingAction = textProcessingAction;
-            this.bytesProcessingAction = bytesProcessingAction;
-            this.maxDegreeOfParallelism = maxDegreeOfParallelism;
-            this.handleFileException = handleFileException;
+            this.config = config;
         }
 
         public void ProcessFiles()
         {
-            DirectoryInfo directory = new DirectoryInfo(folderPath);
+            DirectoryInfo directory = new DirectoryInfo(config.FolderPath);
 
-            if (maxDegreeOfParallelism != null && maxDegreeOfParallelism > 1)
+            if (config.MaxDegreeOfParallelism != null && config.MaxDegreeOfParallelism > 1)
             {
                 Parallel.ForEach(
-                    directory.EnumerateFiles("*", recurseOption == RecurseOption.RecurseYes ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Where(f => IsValidExtension(f.Extension)),
-                    new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? Environment.ProcessorCount },
-                    (file) => GetSingleFileProcessor().ProcessFile(file));
+                    directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly),
+                    new ParallelOptions { MaxDegreeOfParallelism = (int)config.MaxDegreeOfParallelism },
+                    (file) => new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), file.OpenRead()));
             }
             else
             {
-                foreach (FileInfo file in directory.EnumerateFiles("*", recurseOption == RecurseOption.RecurseYes ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Where(f => IsValidExtension(f.Extension)))
+                foreach (FileInfo file in directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
                 {
-                    GetSingleFileProcessor().ProcessFile(file);
+                    Debug.WriteLine($"!!!Processing file {file.FullName}");
+                    new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), file.OpenRead());
                 }
             }
         }
 
         private bool IsValidExtension(string extension)
         {
-            var compareExtensions = includedExtensions.Union(
-                sourceType.IncludesZipped() ?
+            var compareExtensions = config.IncludedExtensions.Union(
+                config.ArchiveSearch.IncludesZipped() ?
                 ZipExtension.List : new List<string>()).Distinct().ToList();
             return compareExtensions.ContainsExtension(extension);
-        }
-
-        private SingleFileProcessor GetSingleFileProcessor()
-        {
-            return new SingleFileProcessor(sourceType, includedExtensions, includeFile, includeZipFile, streamProcessingAction, textProcessingAction, bytesProcessingAction, handleFileException);
         }
     }
 }

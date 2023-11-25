@@ -57,7 +57,7 @@ namespace ArchiveFlow.Tests.UnitTests
         public void IsZipFile_IsZipExtension_ReturnsTrue(string extension)
         {
             // Arrange
-            FileInformation file = new FileInformation("test", extension, 0, DateTime.Now, false);
+            FileInformation file = new FileInformation("test", "test", extension, 0, DateTime.Now, false);
 
             // Act
             bool result = file.IsZipFile();
@@ -70,7 +70,7 @@ namespace ArchiveFlow.Tests.UnitTests
         public void IsZipFile_IsNotZipExtension_ReturnsFalse()
         {
             // Arrange
-            FileInformation file = new FileInformation("test", ".text", 0, DateTime.Now, false);
+            FileInformation file = new FileInformation("test", "test", ".text", 0, DateTime.Now, false);
 
             // Act
             bool result = file.IsZipFile();

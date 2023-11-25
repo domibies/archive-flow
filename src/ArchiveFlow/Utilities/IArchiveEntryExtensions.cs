@@ -11,16 +11,17 @@ namespace ArchiveFlow.Utilities
 {
     internal static class IArchiveEntryExtensions
     {
-        internal static FileInformation ToFileInformation(this IArchiveEntry zipEntry, DateTime defaultDateTime)
+        internal static FileInformation ToFileInformation(this IArchiveEntry zipEntry, FileInformation parentFile)
         {
             Guard.AgainstNull(nameof(zipEntry), zipEntry);
 
             return new FileInformation(
+                parentFile.FileName,
                 zipEntry.Key,
                 zipEntry.Key.LastIndexOf('.') != -1 ?
                     zipEntry.Key.Substring(zipEntry.Key.LastIndexOf('.')) : string.Empty,
                 zipEntry.Size,
-                zipEntry.LastModifiedTime ?? defaultDateTime,
+                zipEntry.LastModifiedTime ?? parentFile.LastModified,
                 true);
         }
     }

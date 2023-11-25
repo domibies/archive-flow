@@ -26,8 +26,10 @@ namespace ArchiveFlow.Tests.UnitTests
 
             var zipEntry = zipEntryMock.Object;
 
+            FileInformation parentFile = new FileInformation("test", "test.zip", ".zip", 0, lastModifiedTime, false);
+
             // Act
-            FileInformation fileInformation = zipEntry.ToFileInformation(lastModifiedTime + TimeSpan.FromDays(1));
+            FileInformation fileInformation = zipEntry.ToFileInformation(parentFile);
 
             // Assert
             fileInformation.Should().NotBeNull();
@@ -43,12 +45,15 @@ namespace ArchiveFlow.Tests.UnitTests
             // Arrange
             DateTime defaultDateTime = new DateTime(2020, 1, 1);
 
+
             var zipEntryMock = new Mock<IArchiveEntry>();
             zipEntryMock.SetupGet(x => x.Key).Returns("test.zip");
             var zipEntry = zipEntryMock.Object;
 
+            FileInformation parentFile = new FileInformation("test", "test.zip", ".zip", 0, defaultDateTime, false);
+
             // Act
-            FileInformation fileInformation = zipEntry.ToFileInformation(defaultDateTime);
+            FileInformation fileInformation = zipEntry.ToFileInformation(parentFile);
 
             // Assert
             fileInformation.Should().NotBeNull();

@@ -1,4 +1,6 @@
 using ArchiveFlow.FileProcessor;
+using ArchiveFlow.Models;
+using ArchiveFlow.Utilities;
 using FluentAssertions;
 using System.Text.RegularExpressions;
 
@@ -20,15 +22,11 @@ namespace ArchiveFlow.Tests.IntegrationTests
 
             int counter = 0;
 
-            var processor = new SharpCompressZipFileProcessor(
-                [".xml"],
-                null,
-                null,
-                (t) => counter++,
-                null);
+            var config = new ProcessorConfig("./data", FolderSelect.RootAndSubFolders, ArchiveSearch.SearchInArchivesOnly, [".xml"], null, null, null, (t) => counter++, null, null, 1);
+            SharpCompressZipFileProcessor processor = new SharpCompressZipFileProcessor(config);
 
             // Act
-            processor.ProcessZipFile(new FileInfo(zipFilePath));
+            processor.ProcessZipFile(new FileInfo(zipFilePath).ToFileInformation());
 
             // Assert
             counter.Should().Be(totalNumberOfFiles_1000xXML);
@@ -42,19 +40,18 @@ namespace ArchiveFlow.Tests.IntegrationTests
 
             int counter = 0;
 
-            var processor = new SharpCompressZipFileProcessor(
-                [".xml"],
+            var config = new ProcessorConfig("./data", FolderSelect.RootAndSubFolders, ArchiveSearch.SearchInArchivesOnly, [".xml"],
                 (f) =>
                 {
                     bool isEven = int.TryParse(Regex.Match(f.FileName, @"\d+").Value, out int number) && number % 2 == 0;
                     return isEven;
-                },
-                null,
-                (t) => counter++,
-                null);
+                }
+            , null, null, (t) => counter++, null, null, 1);
+
+            SharpCompressZipFileProcessor processor = new SharpCompressZipFileProcessor(config);
 
             // Act
-            processor.ProcessZipFile(new FileInfo(zipFilePath));
+            processor.ProcessZipFile(new FileInfo(zipFilePath).ToFileInformation());
 
             // Assert
             counter.Should().Be(totalNumberOfFiles_1000xXML / 2);
@@ -68,15 +65,12 @@ namespace ArchiveFlow.Tests.IntegrationTests
             int counter = 0;
             int byteSize = 0;
 
-            var processor = new SharpCompressZipFileProcessor(
-                [".jpg"],
-                null,
-                null,
-                null,
-                (b) => { counter++; byteSize += b.Length; });
+            var config = new ProcessorConfig("./data", FolderSelect.RootAndSubFolders, ArchiveSearch.SearchInArchivesOnly, [".jpg"], null, null, null, null, (b) => { counter++; byteSize += b.Length; }, null, 1);
+
+            var processor = new SharpCompressZipFileProcessor(config);
 
             // Act
-            processor.ProcessZipFile(new FileInfo(zipFilePath));
+            processor.ProcessZipFile(new FileInfo(zipFilePath).ToFileInformation());
 
             // Assert
             counter.Should().Be(2);
