@@ -6,6 +6,7 @@ ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped a
 
 - Fluent interface for easy configuration and usage.
 - Support for both zipped and unzipped file processing.
+- Supports .zip, .7z, .rar and .tar archives
 - Customizable file filtering based on extensions and custom predicates.
 - Options for reading files as text, binary, or streams.
 - Parallel processing capabilities with configurable degrees of parallelism.
@@ -26,7 +27,7 @@ Install-Package ArchiveFlow
 
 #### Basic Example
 
-Here's a the most basic example to get you started with ArchiveFlow. This will process all files as text file in archive files in the specified folder. The default behaviour is to all entires in archive files in the folder (non-recursive), and ignore non archive files.
+Here's a a simple example to get you started with ArchiveFlow. This will process all files as text file in archive files in the specified folder. The default behaviour is to process all entries in archive files in the folder (non-recursive), and ignore non archive files.
 
 ```csharp
 using ArchiveFlow;
