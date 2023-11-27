@@ -14,7 +14,8 @@ namespace ArchiveFlow.Tests.IntegrationTests
         [Fact]
         public void EndToEnd_Read100x100TxtFiles_Sequential_Works()
         {
-            HashSet<int> allContent = new HashSet<int>();
+            // MT safe.....
+            var concurrentHashSet = new ConcurrentDictionary<int, byte>();
 
             //Prepare
             var builder =
@@ -25,7 +26,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .ProcessAsText((f, t) =>
                 {
                     var contentAsInt = int.Parse(t);
-                    allContent.Add(contentAsInt);
+                    concurrentHashSet.TryAdd(contentAsInt, 0);
                 });
 
             // Act
@@ -34,11 +35,11 @@ namespace ArchiveFlow.Tests.IntegrationTests
             // Assert
             // In the dictionary we expect all the numbers from 1 to 10000
             // because we have 10000 files with 1 number each, spread over 100 zip files
-            allContent.Should().BeEquivalentTo(Enumerable.Range(1, 10000));
+            concurrentHashSet.Keys.Should().BeEquivalentTo(Enumerable.Range(1, 10000));
 
         }
 
-        //[Fact]
+        [Fact]
         public void EndToEnd_Read100x100TxtFiles_InParalllel_Works()
         {
             // MT safe.....
