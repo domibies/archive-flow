@@ -1,11 +1,9 @@
 using Xunit;
-using Moq;
-using System.IO;
 using ArchiveFlow.FileProcessor;
 using System.Reflection;
 using FluentAssertions;
-using ArchiveFlow.Common;
 using ArchiveFlow.Models;
+using System;
 
 namespace ArchiveFlow.Tests.UnitTests
 {

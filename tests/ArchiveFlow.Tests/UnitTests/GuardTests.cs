@@ -1,6 +1,9 @@
 
 using FluentAssertions;
 using ArchiveFlow.Utilities;
+using Xunit;
+using System;
+
 
 namespace ArchiveFlow.Tests.UnitTests
 {

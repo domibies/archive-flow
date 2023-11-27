@@ -1,8 +1,6 @@
 using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
-using Moq;
 using System;
-using System.IO;
 using Xunit;
 using FluentAssertions;
 using SharpCompress.Archives;

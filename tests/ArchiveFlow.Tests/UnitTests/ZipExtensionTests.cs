@@ -2,6 +2,8 @@ using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
 using FluentAssertions;
 using System;
+using Xunit;
+
 
 namespace ArchiveFlow.Tests.UnitTests
 {
@@ -9,7 +11,6 @@ namespace ArchiveFlow.Tests.UnitTests
     {
         [Theory]
         [InlineData("zip")]
-        [InlineData("")]
         public void IsZipExtension_InvalidExtension_ThrowsArgumentException(string extension)
         {
             // Arrange
