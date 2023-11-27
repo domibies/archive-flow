@@ -6,7 +6,7 @@ ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped a
 
 - Fluent interface for easy configuration and usage.
 - Support for both zipped and unzipped file processing.
-- Supports .zip, .7z, .rar and .tar archives
+- Supports .zip, .7z, and .rar archives
 - Customizable file filtering based on extensions and custom predicates.
 - Options for reading files as text, binary, or streams.
 - Parallel processing capabilities with configurable degrees of parallelism.
@@ -49,9 +49,8 @@ Here's an example that is a bit more advanced. It reads all xml files in the spe
 // use a concurrent dictionary beacuse we are using multiple threads
 var dict = new ConcurrentDictionary<string, byte>();
 var builder = new FileProcessorBuilder()
-    .FromFolder("/folder/with/xmlfiles_archived_or_not",
-        ArchiveFlow.Models.FolderSelect.RootAndSubFolders)
-    .SetArchiveSearch(ArchiveFlow.Models.ArchiveSearch.SearchInAndOutsideArchives)
+    .FromFolder("/folder/with/xmlfiles_archived_or_not", FolderSelect.RootAndSubFolders)
+    .SetArchiveSearch(ArchiveSearch.SearchInAndOutsideArchives)
     .FromZipWhere((z) => z.LastModified > DateTime.Now.AddDays(-10))
     .WhereFile((f) => !f.FileName.Contains("ReturnValue"))
     .ProcessAsText((f, t) =>
