@@ -2,6 +2,8 @@
 
 ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped and unzipped file archives. It lets you focus on processing logic instead of file/zip handling code.
 
+[![.NET](https://github.com/domibies/archive-flow/actions/workflows/build_on_push.yml/badge.svg)](https://github.com/domibies/archive-flow/actions/workflows/build_on_push.yml)
+
 ## Features
 
 - Fluent interface for easy configuration and usage.
