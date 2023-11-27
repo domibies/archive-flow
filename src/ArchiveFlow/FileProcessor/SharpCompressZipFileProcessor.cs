@@ -76,13 +76,5 @@ namespace ArchiveFlow.FileProcessor
                 }   
             }
         }
-
-        void ProcessZipEntry(IArchiveEntry entry, FileInformation zipFileInfo)
-        {
-            var processor = new SingleEntryProcessor(config);
-            processor.ProcessEntry(entry.ToFileInformation(zipFileInfo), entry.OpenEntryStream());
-        }
-
-
     }
 }

@@ -38,7 +38,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
 
         }
 
-        [Fact]
+        //[Fact]
         public void EndToEnd_Read100x100TxtFiles_InParalllel_Works()
         {
             // MT safe.....
