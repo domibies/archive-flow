@@ -86,8 +86,8 @@ namespace ArchiveFlow.Tests.UnitTests
         public void SetStreamProcessingAction_AfterOtherProcess_Build_ThrowsInvalidOperationException()
         {
             var builder = new FileProcessorBuilder();
-            builder.ProcessAsText((t) => { });
-            builder.ProcessAsStream((s) => { });
+            builder.ProcessAsText((f, t) => { });
+            builder.ProcessAsStream((f, s) => { });
 
             // Act & Assert
             FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>();
@@ -109,8 +109,8 @@ namespace ArchiveFlow.Tests.UnitTests
         public void SetTextProcessingAction_AfterOtherProcessWith_Build_ThrowsInvalidOperationException()
         {
             var builder = new FileProcessorBuilder();
-            builder.ProcessAsBytes((b) => { });
-            builder.ProcessAsText((t) => { });
+            builder.ProcessAsBytes((f, b) => { });
+            builder.ProcessAsText((f, t) => { });
 
             // Act & Assert
             FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>();
@@ -132,8 +132,8 @@ namespace ArchiveFlow.Tests.UnitTests
         public void SetBytesProcessingAction_AfterOtherProcessWith_ThrowsInvalidOperationException()
         {
             var builder = new FileProcessorBuilder();
-            builder.ProcessAsText((s) => { });
-            builder.ProcessAsBytes((t) => { });
+            builder.ProcessAsText((f, s) => { });
+            builder.ProcessAsBytes((f, t) => { });
 
             // Act & Assert
             FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>();
@@ -170,7 +170,7 @@ namespace ArchiveFlow.Tests.UnitTests
                 .FromFolder("path")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .WithExtension(".txt")
-                .ProcessAsText((t) => { });
+                .ProcessAsText((f, t) => { });
 
             // Act & Assert
             FluentActions.Invoking(() => builder.Build()).Should().NotThrow();
@@ -183,7 +183,7 @@ namespace ArchiveFlow.Tests.UnitTests
             FileProcessorBuilder builder = new FileProcessorBuilder()
                 .FromFolder("path")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
-                .ProcessAsText((t) => { });
+                .ProcessAsText((f, t) => { });
 
             // Act
             var processor = builder.Build();

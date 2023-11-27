@@ -37,7 +37,6 @@ namespace ArchiveFlow.FileProcessor
             {
                 foreach (FileInfo file in directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
                 {
-                    Debug.WriteLine($"!!!Processing file {file.FullName}");
                     new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), file.OpenRead());
                 }
             }

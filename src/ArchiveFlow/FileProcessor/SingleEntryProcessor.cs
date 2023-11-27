@@ -81,7 +81,7 @@ namespace ArchiveFlow.FileProcessor
         private void HandleAsARegularFile(FileInformation file, Stream openStream)
         {
             var streamProcessor = new StreamProcessor(config.StreamProcessingAction, config.TextProcessingAction, config.BytesProcessingAction);
-            streamProcessor.ProcessStream(openStream);
+            streamProcessor.ProcessStream(file, openStream);
         }
 
         private void HandleAsAZipFile(FileInformation file, Stream openStream)

@@ -22,7 +22,7 @@ public class EndToEndTests
             .FromFolder("./data/txt10000")
             .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
             .WithExtension(".txt")
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
             {
                 var contentAsInt = int.Parse(t);
                 allContent.Add(contentAsInt);
@@ -50,7 +50,7 @@ public class EndToEndTests
             .FromFolder("./data/txt10000")
             .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
             .WithExtension(".txt")
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
             {
                 var contentAsInt = int.Parse(t);
                 concurrentHashSet.TryAdd(contentAsInt, 0);
@@ -82,7 +82,7 @@ public class EndToEndTests
             .FromFolder("./data/txt_in_and_outside")
             .SetArchiveSearch(archiveSearch)
             .WithExtension(".txt")
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
             {
                 if (t.Contains("inside"))
                 {
@@ -115,7 +115,7 @@ public class EndToEndTests
             .FromFolder("./data/nested_archives")
             .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
             .WithExtension(".txt")
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
             {
                 foundText = t.Contains("just a file");
             });
@@ -140,7 +140,7 @@ public class EndToEndTests
             .FromFolder("./data/different_extensions")
             .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
             .WithExtension(extensions)
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
             {
                 count++;
             });
@@ -161,7 +161,7 @@ public class EndToEndTests
             new FileProcessorBuilder()
             .FromFolder("./data/subfolders_and_filters", FolderSelect.RootAndSubFolders)
             .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
             {
                 count++;
             });
@@ -183,7 +183,7 @@ public class EndToEndTests
             .FromFolder("./data/subfolders_and_filters", FolderSelect.RootAndSubFolders)
             .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
             .FromZipWhere((f) => f.FileName.StartsWith("group1"))
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
             {
                 count++;
             });
@@ -205,7 +205,28 @@ public class EndToEndTests
             .FromFolder("./data/subfolders_and_filters", FolderSelect.RootAndSubFolders)
             .SetArchiveSearch(ArchiveSearch.SearchInAndOutsideArchives)
             .WhereFile((f) => f.FileName.StartsWith("woohoo"))
-            .ProcessAsText((t) =>
+            .ProcessAsText((f, t) =>
+            {
+                count++;
+            });
+
+        // Act
+        builder.Build().ProcessFiles();
+
+        // Assert
+        count.Should().Be(2);
+    }
+
+    [Fact]
+    public void EndToEnd_FileWithoutExtension_CanBeProcessed()
+    {
+        int count = 0;
+
+        var builder =
+            new FileProcessorBuilder()
+            .FromFolder("./data/no_extension", FolderSelect.RootAndSubFolders)
+            .SetArchiveSearch(ArchiveSearch.SearchInAndOutsideArchives)
+            .ProcessAsText((f, t) =>
             {
                 count++;
             });

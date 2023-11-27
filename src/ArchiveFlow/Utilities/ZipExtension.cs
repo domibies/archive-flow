@@ -11,13 +11,14 @@ namespace ArchiveFlow.Utilities
 {
     internal static class ZipExtension
     {
-        private static readonly List<string> zipExtensionsList = new List<string> { ".zip", ".rar", ".7z", ".tar" };
+        private static readonly List<string> zipExtensionsList = new List<string> { ".zip", ".rar", ".7z" };
         public static IList<string> List => zipExtensionsList;
 
         internal static bool IsZipExtension(this string extension)
         {
-            Guard.AgainstNull(nameof(extension), extension);
-            Guard.AgainsNullOrWhiteSpace(nameof(extension), extension);
+            if (extension is null || string.IsNullOrWhiteSpace(extension))
+                return false;
+
             Guard.ShouldStartWith(nameof(extension), extension, ".");
 
             return zipExtensionsList.Any(s => s.Equals(extension, StringComparison.OrdinalIgnoreCase));

@@ -22,7 +22,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
 
             int counter = 0;
 
-            var config = new ProcessorConfig("./data", FolderSelect.RootAndSubFolders, ArchiveSearch.SearchInArchivesOnly, [".xml"], null, null, null, (t) => counter++, null, null, 1);
+            var config = new ProcessorConfig("./data", FolderSelect.RootAndSubFolders, ArchiveSearch.SearchInArchivesOnly, [".xml"], null, null, null, (f, t) => counter++, null, null, 1);
             SharpCompressZipFileProcessor processor = new SharpCompressZipFileProcessor(config);
 
             // Act
@@ -46,7 +46,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                     bool isEven = int.TryParse(Regex.Match(f.FileName, @"\d+").Value, out int number) && number % 2 == 0;
                     return isEven;
                 }
-            , null, null, (t) => counter++, null, null, 1);
+            , null, null, (f, t) => counter++, null, null, 1);
 
             SharpCompressZipFileProcessor processor = new SharpCompressZipFileProcessor(config);
 
@@ -65,7 +65,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
             int counter = 0;
             int byteSize = 0;
 
-            var config = new ProcessorConfig("./data", FolderSelect.RootAndSubFolders, ArchiveSearch.SearchInArchivesOnly, [".jpg"], null, null, null, null, (b) => { counter++; byteSize += b.Length; }, null, 1);
+            var config = new ProcessorConfig("./data", FolderSelect.RootAndSubFolders, ArchiveSearch.SearchInArchivesOnly, [".jpg"], null, null, null, null, (f, b) => { counter++; byteSize += b.Length; }, null, 1);
 
             var processor = new SharpCompressZipFileProcessor(config);
 

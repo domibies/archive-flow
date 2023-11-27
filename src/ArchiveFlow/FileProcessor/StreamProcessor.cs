@@ -23,39 +23,39 @@ namespace ArchiveFlow.FileProcessor
             this.bytesProcessingAction = bytesProcessingAction;
         }
 
-        public void ProcessStream(Stream stream)
+        public void ProcessStream(FileInformation file, Stream stream)
         {
             Guard.AgainstNull(nameof(stream), stream);
 
-            MaybeProcessStream(stream);
-            MaybeProcessText(stream);
-            MaybeProcessBytes(stream);
+            MaybeProcessStream(file,stream);
+            MaybeProcessText(file,stream);
+            MaybeProcessBytes(file, stream);
         }
 
-        public void MaybeProcessStream(Stream stream)
+        public void MaybeProcessStream(FileInformation file, Stream stream)
         {
             if (!(streamProcessingAction is null))
             {
-                streamProcessingAction?.Invoke(stream);
+                streamProcessingAction?.Invoke(file,stream);
             }
         }
 
-        public void MaybeProcessText(Stream stream)
+        public void MaybeProcessText(FileInformation file, Stream stream)
         {
             if (!(textProcessingAction is null))
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    textProcessingAction?.Invoke(reader.ReadToEnd());
+                    textProcessingAction?.Invoke(file, reader.ReadToEnd());
                 }
             }
         }
 
-        public void MaybeProcessBytes(Stream stream)
+        public void MaybeProcessBytes(FileInformation file, Stream stream)
         {
             if (!(bytesProcessingAction is null))
             {
-                bytesProcessingAction?.Invoke(stream.ReadAllBytes());
+                bytesProcessingAction?.Invoke(file, stream.ReadAllBytes());
             }
         }
     }
