@@ -31,13 +31,22 @@ namespace ArchiveFlow.FileProcessor
                 Parallel.ForEach(
                     directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly),
                     new ParallelOptions { MaxDegreeOfParallelism = (int)config.MaxDegreeOfParallelism },
-                    (file) => new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), file.OpenRead()));
+                    (file) =>
+                    {
+                        using (var stream = file.OpenRead())
+                        {
+                            new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), stream);
+                        }
+                    });
             }
             else
             {
                 foreach (FileInfo file in directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
                 {
-                    new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), file.OpenRead());
+                    using (var stream = file.OpenRead())
+                    {
+                        new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), stream);
+                    }
                 }
             }
         }

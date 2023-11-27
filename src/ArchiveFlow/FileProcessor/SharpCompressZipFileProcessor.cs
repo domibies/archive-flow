@@ -68,8 +68,11 @@ namespace ArchiveFlow.FileProcessor
 
                 foreach(var entry in archive.Entries.Where((e) => e.IsDirectory == false))
                 {
-                    new SingleEntryProcessor(config)
-                        .ProcessEntry(entry.ToFileInformation(zipFileInfo), entry.OpenEntryStream());
+                    using (var entryStream = entry.OpenEntryStream())
+                    {
+                        new SingleEntryProcessor(config)
+                            .ProcessEntry(entry.ToFileInformation(zipFileInfo), entryStream);
+                    }
                 }   
             }
         }
