@@ -12,7 +12,7 @@ ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped a
 - Parallel processing capabilities with configurable degrees of parallelism.
 - Extensible design for future enhancements.
 - Exception handling for robust processing.
-- Support for a wide range of frameworks, (via .NET Standard 2.0 & .NET Standard 2.1)
+- Support for a wide range of frameworks
 
 ## Getting Started
 
@@ -49,14 +49,17 @@ Here's an example that is a bit more advanced. It reads all xml files in the spe
 // use a concurrent dictionary beacuse we are using multiple threads
 var dict = new ConcurrentDictionary<string, byte>();
 var builder = new FileProcessorBuilder()
-    .FromFolder("/folder/with/xmlfiles_archived_or_not", ArchiveFlow.Models.FolderSelect.RootAndSubFolders)
+    .FromFolder("/folder/with/xmlfiles_archived_or_not",
+        ArchiveFlow.Models.FolderSelect.RootAndSubFolders)
     .SetArchiveSearch(ArchiveFlow.Models.ArchiveSearch.SearchInAndOutsideArchives)
     .FromZipWhere((z) => z.LastModified > DateTime.Now.AddDays(-10))
     .WhereFile((f) => !f.FileName.Contains("ReturnValue"))
     .ProcessAsText((f, t) =>
     {
         XDocument xdoc = XDocument.Parse(t);
-        (string? id, string? name) = (xdoc.Descendants("Id").FirstOrDefault()?.Value, xdoc.Descendants("Name").FirstOrDefault()?.Value);
+        (string? id, string? name) =
+            (xdoc.Descendants("Id").FirstOrDefault()?.Value, 
+             xdoc.Descendants("Name").FirstOrDefault()?.Value);
 
         dict.TryAdd($"{id}_{name}", 0);
     })
@@ -70,6 +73,8 @@ var builder = new FileProcessorBuilder()
         }
         return false;
     });
+
+builder.Build().ProcessFiles();
 ```
 
    
