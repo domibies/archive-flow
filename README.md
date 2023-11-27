@@ -12,6 +12,7 @@ ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped a
 - Parallel processing capabilities with configurable degrees of parallelism.
 - Extensible design for future enhancements.
 - Exception handling for robust processing.
+- Support for a wide range of frameworks, (via .NET Standard 2.0 & .NET Standard 2.1)
 
 ## Getting Started
 
@@ -30,8 +31,6 @@ Install-Package ArchiveFlow
 Here's a a simple example to get you started with ArchiveFlow. This will process all files as text file in archive files in the specified folder. The default behaviour is to process all entries in archive files in the folder (non-recursive), and ignore non archive files.
 
 ```csharp
-using ArchiveFlow;
-
 var builder = new FileProcessorBuilder()
     .FromFolder("./your/path")
     .ProcessAsText((t) =>
@@ -41,6 +40,38 @@ var builder = new FileProcessorBuilder()
 
 builder.Build().ProcessFiles();
 ```
+
+#### More Advanced Example
+
+Here's an example that is a bit more advanced. It reads all xml files in the specified folder, recursively, including archives younger than 10 days, and processes the text as xml. It also sets the maximum degree of parallelism to the number of processors on the machine, and handles exceptions for corrupted zip files.
+
+```csharp
+// use a concurrent dictionary beacuse we are using multiple threads
+var dict = new ConcurrentDictionary<string, byte>();
+var builder = new FileProcessorBuilder()
+    .FromFolder("/folder/with/xmlfiles_archived_or_not", ArchiveFlow.Models.FolderSelect.RootAndSubFolders)
+    .SetArchiveSearch(ArchiveFlow.Models.ArchiveSearch.SearchInAndOutsideArchives)
+    .FromZipWhere((z) => z.LastModified > DateTime.Now.AddDays(-10))
+    .WhereFile((f) => !f.FileName.Contains("ReturnValue"))
+    .ProcessAsText((f, t) =>
+    {
+        XDocument xdoc = XDocument.Parse(t);
+        (string? id, string? name) = (xdoc.Descendants("Id").FirstOrDefault()?.Value, xdoc.Descendants("Name").FirstOrDefault()?.Value);
+
+        dict.TryAdd($"{id}_{name}", 0);
+    })
+    .WithMaxDegreeOfParallelism(Environment.ProcessorCount)
+    .HandleExceptionWith((f, ex) =>
+    {
+        if (f.Extension == ".zip" && ex is InvalidOperationException)
+        {
+            // ignore these exceptions for zip files (corrupted zip)
+            return true;
+        }
+        return false;
+    });
+```
+
    
 ## Contributing
 
