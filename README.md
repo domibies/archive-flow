@@ -99,5 +99,5 @@ Distributed under the MIT License.
 
 Dominique Biesmans - [https://www.linkedin.com/in/dominiquebiesmans/](https://www.linkedin.com/in/dominiquebiesmans/) 
 
-Project Link: [https://github.com/domibies/ArchiveFlow](https://github.com/domibies/ArchiveFlow)
+Project Link: [https://github.com/domibies/archive-flow](https://github.com/domibies/archive-flow)
 
