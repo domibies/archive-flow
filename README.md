@@ -93,11 +93,11 @@ Contributions are what make the open-source community such an amazing place to l
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License.
 
 ## Contact
 
-Dominique Biesmans - [https://www.linkedin.com/in/dominiquebiesmans/](LinkedIn) 
+Dominique Biesmans - [https://www.linkedin.com/in/dominiquebiesmans/](https://www.linkedin.com/in/dominiquebiesmans/) 
 
-Project Link: [https://github.com/domibies/ArchiveFlow](#)
+Project Link: [https://github.com/domibies/ArchiveFlow](https://github.com/domibies/ArchiveFlow)
 
