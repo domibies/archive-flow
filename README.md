@@ -1,4 +1,4 @@
-# ![Logo](src/ArchiveFlow/icon_128x128.png) ArchiveFlow
+# ![Logo](https://raw.githubusercontent.com/domibies/archive-flow/main/src/ArchiveFlow/icon_128x128.png) ArchiveFlow
 
 ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped and unzipped file archives. It lets you focus on processing logic instead of file/zip handling code.
 
