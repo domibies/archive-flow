@@ -25,7 +25,7 @@ ArchiveFlow is a Fluent API for streamlined and efficient processing of zipped a
 To use ArchiveFlow in your project, add the following package to your dependencies:
 
 ```shell
-Install-Package ArchiveFlow
+dotnet add package ArchiveFlow
 ```
 
 ### Usage
@@ -37,7 +37,7 @@ Here's a a simple example to get you started with ArchiveFlow. This will process
 ```csharp
 var builder = new FileProcessorBuilder()
     .FromFolder("./your/path")
-    .ProcessAsText((t) =>
+    .ProcessAsText((f, t) =>
     {
         // Your text processing logic here
     })
@@ -79,6 +79,8 @@ var builder = new FileProcessorBuilder()
 
 builder.Build().ProcessFiles();
 ```
+
+check out this fiddle for a working example: [https://dotnetfiddle.net/sIwHrW](https://dotnetfiddle.net/sIwHrW)
 
    
 ## Contributing
