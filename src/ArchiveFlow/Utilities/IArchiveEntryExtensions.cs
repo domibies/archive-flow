@@ -15,8 +15,12 @@ namespace ArchiveFlow.Utilities
         {
             Guard.AgainstNull(nameof(zipEntry), zipEntry);
 
+            var folder = string.IsNullOrEmpty(parentFile.Volume) ?
+                parentFile.FileName:
+                Path.Combine(parentFile.Volume, parentFile.FileName);
+
             return new FileInformation(
-                parentFile.FileName,
+                folder,
                 zipEntry.Key,
                 zipEntry.Key.LastIndexOf('.') != -1 ?
                     zipEntry.Key.Substring(zipEntry.Key.LastIndexOf('.')) : string.Empty,

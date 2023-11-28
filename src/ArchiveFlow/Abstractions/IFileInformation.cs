@@ -4,10 +4,11 @@ namespace ArchiveFlow.Abstractions
 {
     public interface IFileInformation
     {
-        string Extension { get; set; }
-        string FileName { get; set; }
-        bool InArchive { get; set; }
-        DateTime LastModified { get; set; }
-        long Size { get; set; }
+        string Volume { get; }
+        string FileName { get; }
+        string Extension { get;}
+        bool InArchive { get; }
+        DateTime LastModified { get; }
+        long Size { get; }
     }
 }

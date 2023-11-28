@@ -17,9 +17,9 @@ namespace ArchiveFlow.Models
         public bool InArchive { get; set; }
         //public IArchive? ArchiveReference { get; set; } // only for internal
 
-        public FileInformation(string folder, string fileName, string extension, long size, DateTime lastModified, bool inArchive/*, IArchive? archiveReference = null*/)
+        public FileInformation(string volume, string fileName, string extension, long size, DateTime lastModified, bool inArchive/*, IArchive? archiveReference = null*/)
         {
-            Volume = folder;
+            Volume = volume;
             FileName = fileName;
             Extension = extension;
             Size = size;
