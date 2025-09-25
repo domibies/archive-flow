@@ -21,6 +21,9 @@ namespace ArchiveFlow.FileProcessor
         private StreamProcessingAction? streamProcessingAction;
         private TextProcessingAction? textProcessingAction;
         private BytesProcessingAction? bytesProcessingAction;
+        private AsyncStreamProcessingAction? asyncStreamProcessingAction;
+        private AsyncTextProcessingAction? asyncTextProcessingAction;
+        private AsyncBytesProcessingAction? asyncBytesProcessingAction;
         private FileExceptionHandler? handleFileException;
         private int? maxDegreeOfParallelism;
 
@@ -88,6 +91,30 @@ namespace ArchiveFlow.FileProcessor
             return this;
         }
 
+        public FileProcessorBuilder ProcessAsStreamAsync(AsyncStreamProcessingAction action)
+        {
+            Guard.AgainstNull(nameof(action), action);
+
+            asyncStreamProcessingAction = action;
+            return this;
+        }
+
+        public FileProcessorBuilder ProcessAsTextAsync(AsyncTextProcessingAction action)
+        {
+            Guard.AgainstNull(nameof(action), action);
+
+            asyncTextProcessingAction = action;
+            return this;
+        }
+
+        public FileProcessorBuilder ProcessAsBytesAsync(AsyncBytesProcessingAction action)
+        {
+            Guard.AgainstNull(nameof(action), action);
+
+            asyncBytesProcessingAction = action;
+            return this;
+        }
+
         public FileProcessorBuilder HandleExceptionWith(FileExceptionHandler handler)
         {
             Guard.AgainstNull(nameof(handler), handler);
@@ -116,6 +143,9 @@ namespace ArchiveFlow.FileProcessor
                                streamProcessingAction: streamProcessingAction,
                                textProcessingAction: textProcessingAction,
                                bytesProcessingAction: bytesProcessingAction,
+                               asyncStreamProcessingAction: asyncStreamProcessingAction,
+                               asyncTextProcessingAction: asyncTextProcessingAction,
+                               asyncBytesProcessingAction: asyncBytesProcessingAction,
                                handleFileException: handleFileException,
                                maxDegreeOfParallelism: maxDegreeOfParallelism);
         }
@@ -125,17 +155,28 @@ namespace ArchiveFlow.FileProcessor
             if (folderPath == null)
                 throw new InvalidOperationException("Cannot build, no FromFolder() defined.");
 
-            if (streamProcessingAction == null && textProcessingAction == null && bytesProcessingAction == null)
-                throw new InvalidOperationException("Cannot build, no ProcessAsXXX() defined.");
+            bool hasSync = streamProcessingAction != null || textProcessingAction != null || bytesProcessingAction != null;
+            bool hasAsync = asyncStreamProcessingAction != null || asyncTextProcessingAction != null || asyncBytesProcessingAction != null;
 
-            int actionCount = 0;
-            actionCount += streamProcessingAction != null ? 1 : 0;
-            actionCount += textProcessingAction != null ? 1 : 0;
-            actionCount += bytesProcessingAction != null ? 1 : 0;
+            if (!hasSync && !hasAsync)
+                throw new InvalidOperationException("Cannot build, no ProcessAsXXX() or ProcessAsXXXAsync() defined.");
 
-            if (actionCount > 1)
+            if (hasSync && hasAsync)
+                throw new InvalidOperationException("Cannot build, cannot mix sync and async ProcessAsXXX() methods.");
+
+            int syncActionCount = 0;
+            syncActionCount += streamProcessingAction != null ? 1 : 0;
+            syncActionCount += textProcessingAction != null ? 1 : 0;
+            syncActionCount += bytesProcessingAction != null ? 1 : 0;
+
+            int asyncActionCount = 0;
+            asyncActionCount += asyncStreamProcessingAction != null ? 1 : 0;
+            asyncActionCount += asyncTextProcessingAction != null ? 1 : 0;
+            asyncActionCount += asyncBytesProcessingAction != null ? 1 : 0;
+
+            if (syncActionCount > 1 || asyncActionCount > 1)
             {
-                throw new InvalidOperationException("Cannot build, more than one ProcessAsXXX() defined.");
+                throw new InvalidOperationException("Cannot build, more than one ProcessAsXXX() method defined.");
             }
 
             return new FileProcessor(GetConfig());

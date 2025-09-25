@@ -2,6 +2,7 @@
 using ArchiveFlow.Models;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ArchiveFlow.Common
 {
@@ -10,4 +11,9 @@ namespace ArchiveFlow.Common
     public delegate void TextProcessingAction(IFileInformation f, string text);
     public delegate void BytesProcessingAction(IFileInformation f,byte[] data);
     public delegate bool FileExceptionHandler(IFileInformation f, Exception ex);
+    
+    // Async versions of the processing delegates
+    public delegate Task AsyncStreamProcessingAction(IFileInformation f, Stream stream);
+    public delegate Task AsyncTextProcessingAction(IFileInformation f, string text);
+    public delegate Task AsyncBytesProcessingAction(IFileInformation f, byte[] data);
 }

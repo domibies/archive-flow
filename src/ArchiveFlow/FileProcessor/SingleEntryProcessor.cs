@@ -3,6 +3,7 @@ using ArchiveFlow.Utilities;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ArchiveFlow.FileProcessor
 {
@@ -37,6 +38,31 @@ namespace ArchiveFlow.FileProcessor
                         break;
                     case HandleType.HandleAsARegularFile:
                         HandleAsARegularFile(file, openStream);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (config.HandleFileException == null || !config.HandleFileException(file, ex))
+                    throw;
+            }
+        }
+
+        public async Task ProcessEntryAsync(FileInformation file, Stream openStream)
+        {
+            HandleType handleType = HowToHandle(file);
+
+            try
+            {
+                switch (handleType)
+                {
+                    case HandleType.HandleAsAZipFile:
+                        await HandleAsAZipFileAsync(file, openStream);
+                        break;
+                    case HandleType.HandleAsARegularFile:
+                        await HandleAsARegularFileAsync(file, openStream);
                         break;
                     default:
                         break;
@@ -84,6 +110,12 @@ namespace ArchiveFlow.FileProcessor
             streamProcessor.ProcessStream(file, openStream);
         }
 
+        private async Task HandleAsARegularFileAsync(FileInformation file, Stream openStream)
+        {
+            var streamProcessor = new StreamProcessor(config.AsyncStreamProcessingAction, config.AsyncTextProcessingAction, config.AsyncBytesProcessingAction);
+            await streamProcessor.ProcessStreamAsync(file, openStream);
+        }
+
         private void HandleAsAZipFile(FileInformation file, Stream openStream)
         {
             var zipFileProcessor = new SharpCompressZipFileProcessor(config);
@@ -99,6 +131,23 @@ namespace ArchiveFlow.FileProcessor
             }                
             
             zipFileProcessor.ProcessZipFile(file, openStream);            
+        }
+
+        private async Task HandleAsAZipFileAsync(FileInformation file, Stream openStream)
+        {
+            var zipFileProcessor = new SharpCompressZipFileProcessor(config);
+
+            if (!openStream.CanSeek)
+            {
+                var memoryStream = new MemoryStream();
+
+                await openStream.CopyToAsync(memoryStream);
+                openStream.Dispose();
+                openStream = memoryStream;
+                openStream.Seek(0, SeekOrigin.Begin);
+            }                
+            
+            await zipFileProcessor.ProcessZipFileAsync(file, openStream);            
         }
     }
 }

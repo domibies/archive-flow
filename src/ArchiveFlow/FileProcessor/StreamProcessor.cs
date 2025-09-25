@@ -4,6 +4,7 @@ using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ArchiveFlow.FileProcessor
 {
@@ -12,6 +13,9 @@ namespace ArchiveFlow.FileProcessor
         private readonly StreamProcessingAction? streamProcessingAction;
         private readonly TextProcessingAction? textProcessingAction;
         private readonly BytesProcessingAction? bytesProcessingAction;
+        private readonly AsyncStreamProcessingAction? asyncStreamProcessingAction;
+        private readonly AsyncTextProcessingAction? asyncTextProcessingAction;
+        private readonly AsyncBytesProcessingAction? asyncBytesProcessingAction;
 
         public StreamProcessor(
             StreamProcessingAction? streamProcessingAction,
@@ -21,6 +25,16 @@ namespace ArchiveFlow.FileProcessor
             this.streamProcessingAction = streamProcessingAction;
             this.textProcessingAction = textProcessingAction;
             this.bytesProcessingAction = bytesProcessingAction;
+        }
+        
+        public StreamProcessor(
+            AsyncStreamProcessingAction? asyncStreamProcessingAction,
+            AsyncTextProcessingAction? asyncTextProcessingAction,
+            AsyncBytesProcessingAction? asyncBytesProcessingAction)
+        {
+            this.asyncStreamProcessingAction = asyncStreamProcessingAction;
+            this.asyncTextProcessingAction = asyncTextProcessingAction;
+            this.asyncBytesProcessingAction = asyncBytesProcessingAction;
         }
 
         public void ProcessStream(FileInformation file, Stream stream)
@@ -56,6 +70,44 @@ namespace ArchiveFlow.FileProcessor
             if (!(bytesProcessingAction is null))
             {
                 bytesProcessingAction?.Invoke(file, stream.ReadAllBytes());
+            }
+        }
+
+        public async Task ProcessStreamAsync(FileInformation file, Stream stream)
+        {
+            Guard.AgainstNull(nameof(stream), stream);
+
+            await MaybeProcessStreamAsync(file, stream);
+            await MaybeProcessTextAsync(file, stream);
+            await MaybeProcessBytesAsync(file, stream);
+        }
+
+        public async Task MaybeProcessStreamAsync(FileInformation file, Stream stream)
+        {
+            if (!(asyncStreamProcessingAction is null))
+            {
+                await asyncStreamProcessingAction(file, stream);
+            }
+        }
+
+        public async Task MaybeProcessTextAsync(FileInformation file, Stream stream)
+        {
+            if (!(asyncTextProcessingAction is null))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    var content = await reader.ReadToEndAsync();
+                    await asyncTextProcessingAction(file, content);
+                }
+            }
+        }
+
+        public async Task MaybeProcessBytesAsync(FileInformation file, Stream stream)
+        {
+            if (!(asyncBytesProcessingAction is null))
+            {
+                var bytes = await stream.ReadAllBytesAsync();
+                await asyncBytesProcessingAction(file, bytes);
             }
         }
     }
