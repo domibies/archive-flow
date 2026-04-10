@@ -3,6 +3,7 @@ using ArchiveFlow.Utilities;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArchiveFlow.FileProcessor
@@ -50,7 +51,7 @@ namespace ArchiveFlow.FileProcessor
             }
         }
 
-        public async Task ProcessEntryAsync(FileInformation file, Stream openStream)
+        public async Task ProcessEntryAsync(FileInformation file, Stream openStream, CancellationToken cancellationToken = default)
         {
             HandleType handleType = HowToHandle(file);
 
@@ -59,10 +60,10 @@ namespace ArchiveFlow.FileProcessor
                 switch (handleType)
                 {
                     case HandleType.HandleAsAZipFile:
-                        await HandleAsAZipFileAsync(file, openStream);
+                        await HandleAsAZipFileAsync(file, openStream, cancellationToken).ConfigureAwait(false);
                         break;
                     case HandleType.HandleAsARegularFile:
-                        await HandleAsARegularFileAsync(file, openStream);
+                        await HandleAsARegularFileAsync(file, openStream, cancellationToken).ConfigureAwait(false);
                         break;
                     default:
                         break;
@@ -110,10 +111,10 @@ namespace ArchiveFlow.FileProcessor
             streamProcessor.ProcessStream(file, openStream);
         }
 
-        private async Task HandleAsARegularFileAsync(FileInformation file, Stream openStream)
+        private async Task HandleAsARegularFileAsync(FileInformation file, Stream openStream, CancellationToken cancellationToken = default)
         {
             var streamProcessor = new StreamProcessor(config.AsyncStreamProcessingAction, config.AsyncTextProcessingAction, config.AsyncBytesProcessingAction);
-            await streamProcessor.ProcessStreamAsync(file, openStream);
+            await streamProcessor.ProcessStreamAsync(file, openStream, cancellationToken).ConfigureAwait(false);
         }
 
         private void HandleAsAZipFile(FileInformation file, Stream openStream)
@@ -133,7 +134,7 @@ namespace ArchiveFlow.FileProcessor
             zipFileProcessor.ProcessZipFile(file, openStream);            
         }
 
-        private async Task HandleAsAZipFileAsync(FileInformation file, Stream openStream)
+        private async Task HandleAsAZipFileAsync(FileInformation file, Stream openStream, CancellationToken cancellationToken = default)
         {
             var zipFileProcessor = new SharpCompressZipFileProcessor(config);
 
@@ -141,13 +142,13 @@ namespace ArchiveFlow.FileProcessor
             {
                 var memoryStream = new MemoryStream();
 
-                await openStream.CopyToAsync(memoryStream);
+                await openStream.CopyToAsync(memoryStream, 81920, cancellationToken).ConfigureAwait(false);
                 openStream.Dispose();
                 openStream = memoryStream;
                 openStream.Seek(0, SeekOrigin.Begin);
-            }                
-            
-            await zipFileProcessor.ProcessZipFileAsync(file, openStream);            
+            }
+
+            await zipFileProcessor.ProcessZipFileAsync(file, openStream, cancellationToken).ConfigureAwait(false);
         }
     }
 }

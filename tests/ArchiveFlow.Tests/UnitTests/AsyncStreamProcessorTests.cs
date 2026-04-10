@@ -19,7 +19,7 @@ namespace ArchiveFlow.Tests.UnitTests
 
             var processor = new StreamProcessor(
                 null,
-                async (f, text) => 
+                async (f, text, ct) =>
                 {
                     await Task.Yield();
                     actionCalled = true;
@@ -49,7 +49,7 @@ namespace ArchiveFlow.Tests.UnitTests
             var processor = new StreamProcessor(
                 null,
                 null,
-                async (f, bytes) => 
+                async (f, bytes, ct) =>
                 {
                     await Task.Yield();
                     actionCalled = true;
@@ -76,7 +76,7 @@ namespace ArchiveFlow.Tests.UnitTests
             long streamLength = 0;
 
             var processor = new StreamProcessor(
-                async (f, stream) => 
+                async (f, stream, ct) =>
                 {
                     await Task.Yield();
                     actionCalled = true;
@@ -138,8 +138,8 @@ namespace ArchiveFlow.Tests.UnitTests
         {
             // Arrange
             var processor = new StreamProcessor(
-                async (f, s) => await Task.Yield(), 
-                null, 
+                async (f, s, ct) => await Task.Yield(),
+                null,
                 null);
             var fileInfo = new FileInformation("", "test.dat", ".dat", 100, DateTime.Now, false);
 

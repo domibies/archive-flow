@@ -52,10 +52,10 @@ namespace ArchiveFlow.FileProcessor
             }
         }
 
-        public async Task ProcessFilesAsync()
+        public async Task ProcessFilesAsync(CancellationToken cancellationToken = default)
         {
             DirectoryInfo directory = new DirectoryInfo(config.FolderPath);
-            var files = directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            var files = directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).ToList();
 
             if (config.MaxDegreeOfParallelism != null && config.MaxDegreeOfParallelism > 1)
             {
@@ -64,12 +64,12 @@ namespace ArchiveFlow.FileProcessor
                 {
                     var tasks = files.Select(async file =>
                     {
-                        await semaphore.WaitAsync();
+                        await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                         try
                         {
                             using (var stream = file.OpenRead())
                             {
-                                await new SingleEntryProcessor(config).ProcessEntryAsync(file.ToFileInformation(), stream);
+                                await new SingleEntryProcessor(config).ProcessEntryAsync(file.ToFileInformation(), stream, cancellationToken).ConfigureAwait(false);
                             }
                         }
                         finally
@@ -77,8 +77,8 @@ namespace ArchiveFlow.FileProcessor
                             semaphore.Release();
                         }
                     });
-                    
-                    await Task.WhenAll(tasks);
+
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
                 }
             }
             else
@@ -87,7 +87,7 @@ namespace ArchiveFlow.FileProcessor
                 {
                     using (var stream = file.OpenRead())
                     {
-                        await new SingleEntryProcessor(config).ProcessEntryAsync(file.ToFileInformation(), stream);
+                        await new SingleEntryProcessor(config).ProcessEntryAsync(file.ToFileInformation(), stream, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

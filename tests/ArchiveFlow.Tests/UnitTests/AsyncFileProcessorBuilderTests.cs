@@ -17,7 +17,7 @@ namespace ArchiveFlow.Tests.UnitTests
             var builder = new FileProcessorBuilder();
             
             // Act
-            builder.ProcessAsTextAsync(async (f, t) => await Task.Yield());
+            builder.ProcessAsTextAsync(async (f, t, ct) => await Task.Yield());
             
             // Get the private field via reflection to verify it was set
             var field = builder.GetType()?.GetField("asyncTextProcessingAction", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -34,7 +34,7 @@ namespace ArchiveFlow.Tests.UnitTests
             var builder = new FileProcessorBuilder();
             
             // Act
-            builder.ProcessAsStreamAsync(async (f, s) => await Task.Yield());
+            builder.ProcessAsStreamAsync(async (f, s, ct) => await Task.Yield());
             
             // Get the private field via reflection to verify it was set
             var field = builder.GetType()?.GetField("asyncStreamProcessingAction", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -51,7 +51,7 @@ namespace ArchiveFlow.Tests.UnitTests
             var builder = new FileProcessorBuilder();
             
             // Act
-            builder.ProcessAsBytesAsync(async (f, b) => await Task.Yield());
+            builder.ProcessAsBytesAsync(async (f, b, ct) => await Task.Yield());
             
             // Get the private field via reflection to verify it was set
             var field = builder.GetType()?.GetField("asyncBytesProcessingAction", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -104,7 +104,7 @@ namespace ArchiveFlow.Tests.UnitTests
             FileProcessorBuilder builder = new FileProcessorBuilder()
                 .FromFolder("path")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
-                .ProcessAsTextAsync(async (f, t) => await Task.Yield());
+                .ProcessAsTextAsync(async (f, t, ct) => await Task.Yield());
 
             // Act
             var processor = builder.Build();
@@ -121,7 +121,7 @@ namespace ArchiveFlow.Tests.UnitTests
                 .FromFolder("path")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .ProcessAsText((f, t) => { })
-                .ProcessAsTextAsync(async (f, t) => await Task.Yield());
+                .ProcessAsTextAsync(async (f, t, ct) => await Task.Yield());
 
             // Act & Assert
             FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>()
@@ -135,8 +135,8 @@ namespace ArchiveFlow.Tests.UnitTests
             FileProcessorBuilder builder = new FileProcessorBuilder()
                 .FromFolder("path")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
-                .ProcessAsTextAsync(async (f, t) => await Task.Yield())
-                .ProcessAsBytesAsync(async (f, b) => await Task.Yield());
+                .ProcessAsTextAsync(async (f, t, ct) => await Task.Yield())
+                .ProcessAsBytesAsync(async (f, b, ct) => await Task.Yield());
 
             // Act & Assert
             FluentActions.Invoking(() => builder.Build()).Should().Throw<InvalidOperationException>()

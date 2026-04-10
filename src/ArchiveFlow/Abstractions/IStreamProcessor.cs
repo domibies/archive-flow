@@ -1,6 +1,7 @@
 
 using ArchiveFlow.Models;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArchiveFlow.Abstractions
@@ -11,11 +12,11 @@ namespace ArchiveFlow.Abstractions
         void MaybeProcessStream(FileInformation file, Stream stream);
         void MaybeProcessText(FileInformation file, Stream stream);
         void MaybeProcessBytes(FileInformation file, Stream stream);
-        
+
         // Async versions
-        Task ProcessStreamAsync(FileInformation file, Stream stream);
-        Task MaybeProcessStreamAsync(FileInformation file, Stream stream);
-        Task MaybeProcessTextAsync(FileInformation file, Stream stream);
-        Task MaybeProcessBytesAsync(FileInformation file, Stream stream);
+        Task ProcessStreamAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default);
+        Task MaybeProcessStreamAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default);
+        Task MaybeProcessTextAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default);
+        Task MaybeProcessBytesAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default);
     }
 }

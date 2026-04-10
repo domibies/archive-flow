@@ -25,7 +25,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .FromFolder("./data/txt10000")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .WithExtension(".txt")
-                .ProcessAsTextAsync(async (f, t) =>
+                .ProcessAsTextAsync(async (f, t, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     var contentAsInt = int.Parse(t);
@@ -53,7 +53,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .FromFolder("./data/txt10000")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .WithExtension(".txt")
-                .ProcessAsTextAsync(async (f, t) =>
+                .ProcessAsTextAsync(async (f, t, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     var contentAsInt = int.Parse(t);
@@ -85,7 +85,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .FromFolder("./data/txt_in_and_outside")
                 .SetArchiveSearch(archiveSearch)
                 .WithExtension(".txt")
-                .ProcessAsTextAsync(async (f, t) =>
+                .ProcessAsTextAsync(async (f, t, ct) =>
                 {
                     await Task.Delay(1); // Simulate some async work
                     if (t.Contains("inside"))
@@ -117,7 +117,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .FromFolder("./data/nested_archives")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .WithExtension(".txt")
-                .ProcessAsTextAsync(async (f, t) =>
+                .ProcessAsTextAsync(async (f, t, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     foundText = t.Contains("just a file");
@@ -143,7 +143,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .FromFolder("./data/different_extensions")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .WithExtension(extensions)
-                .ProcessAsTextAsync(async (f, t) =>
+                .ProcessAsTextAsync(async (f, t, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     Interlocked.Increment(ref count);
@@ -165,7 +165,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 new FileProcessorBuilder()
                 .FromFolder("./data/subfolders_and_filters", FolderSelect.RootAndSubFolders)
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
-                .ProcessAsTextAsync(async (f, t) =>
+                .ProcessAsTextAsync(async (f, t, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     Interlocked.Increment(ref count);
@@ -188,7 +188,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .FromFolder("./data/txt_in_and_outside")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .WithExtension(".txt")
-                .ProcessAsStreamAsync(async (f, stream) =>
+                .ProcessAsStreamAsync(async (f, stream, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     // Just verify we can read from the stream
@@ -220,7 +220,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 .FromFolder("./data/different_extensions")
                 .SetArchiveSearch(ArchiveSearch.SearchInArchivesOnly)
                 .WithExtension(".log")
-                .ProcessAsBytesAsync(async (f, bytes) =>
+                .ProcessAsBytesAsync(async (f, bytes, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     Interlocked.Increment(ref count);
@@ -245,7 +245,7 @@ namespace ArchiveFlow.Tests.IntegrationTests
                 new FileProcessorBuilder()
                 .FromFolder("./data/invalid_zip", FolderSelect.RootAndSubFolders)
                 .SetArchiveSearch(ArchiveSearch.SearchInAndOutsideArchives)
-                .ProcessAsTextAsync(async (f, t) =>
+                .ProcessAsTextAsync(async (f, t, ct) =>
                 {
                     await Task.Yield(); // Simulate some async work
                     Interlocked.Increment(ref count);

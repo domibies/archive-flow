@@ -4,6 +4,7 @@ using ArchiveFlow.Models;
 using ArchiveFlow.Utilities;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArchiveFlow.FileProcessor
@@ -26,7 +27,7 @@ namespace ArchiveFlow.FileProcessor
             this.textProcessingAction = textProcessingAction;
             this.bytesProcessingAction = bytesProcessingAction;
         }
-        
+
         public StreamProcessor(
             AsyncStreamProcessingAction? asyncStreamProcessingAction,
             AsyncTextProcessingAction? asyncTextProcessingAction,
@@ -73,41 +74,41 @@ namespace ArchiveFlow.FileProcessor
             }
         }
 
-        public async Task ProcessStreamAsync(FileInformation file, Stream stream)
+        public async Task ProcessStreamAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default)
         {
             Guard.AgainstNull(nameof(stream), stream);
 
-            await MaybeProcessStreamAsync(file, stream);
-            await MaybeProcessTextAsync(file, stream);
-            await MaybeProcessBytesAsync(file, stream);
+            await MaybeProcessStreamAsync(file, stream, cancellationToken).ConfigureAwait(false);
+            await MaybeProcessTextAsync(file, stream, cancellationToken).ConfigureAwait(false);
+            await MaybeProcessBytesAsync(file, stream, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task MaybeProcessStreamAsync(FileInformation file, Stream stream)
+        public async Task MaybeProcessStreamAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default)
         {
             if (!(asyncStreamProcessingAction is null))
             {
-                await asyncStreamProcessingAction(file, stream);
+                await asyncStreamProcessingAction(file, stream, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        public async Task MaybeProcessTextAsync(FileInformation file, Stream stream)
+        public async Task MaybeProcessTextAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default)
         {
             if (!(asyncTextProcessingAction is null))
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    var content = await reader.ReadToEndAsync();
-                    await asyncTextProcessingAction(file, content);
+                    var content = await reader.ReadToEndAsync().ConfigureAwait(false);
+                    await asyncTextProcessingAction(file, content, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
 
-        public async Task MaybeProcessBytesAsync(FileInformation file, Stream stream)
+        public async Task MaybeProcessBytesAsync(FileInformation file, Stream stream, CancellationToken cancellationToken = default)
         {
             if (!(asyncBytesProcessingAction is null))
             {
-                var bytes = await stream.ReadAllBytesAsync();
-                await asyncBytesProcessingAction(file, bytes);
+                var bytes = await stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false);
+                await asyncBytesProcessingAction(file, bytes, cancellationToken).ConfigureAwait(false);
             }
         }
     }
