@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArchiveFlow.FileProcessor
@@ -46,6 +47,47 @@ namespace ArchiveFlow.FileProcessor
                     using (var stream = file.OpenRead())
                     {
                         new SingleEntryProcessor(config).ProcessEntry(file.ToFileInformation(), stream);
+                    }
+                }
+            }
+        }
+
+        public async Task ProcessFilesAsync(CancellationToken cancellationToken = default)
+        {
+            DirectoryInfo directory = new DirectoryInfo(config.FolderPath);
+            var files = directory.EnumerateFiles("*", config.FolderSelect == FolderSelect.RootAndSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).ToList();
+
+            if (config.MaxDegreeOfParallelism != null && config.MaxDegreeOfParallelism > 1)
+            {
+                // Use SemaphoreSlim to control concurrency for async operations
+                using (var semaphore = new System.Threading.SemaphoreSlim(config.MaxDegreeOfParallelism.Value))
+                {
+                    var tasks = files.Select(async file =>
+                    {
+                        await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            using (var stream = file.OpenRead())
+                            {
+                                await new SingleEntryProcessor(config).ProcessEntryAsync(file.ToFileInformation(), stream, cancellationToken).ConfigureAwait(false);
+                            }
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    });
+
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                foreach (FileInfo file in files)
+                {
+                    using (var stream = file.OpenRead())
+                    {
+                        await new SingleEntryProcessor(config).ProcessEntryAsync(file.ToFileInformation(), stream, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

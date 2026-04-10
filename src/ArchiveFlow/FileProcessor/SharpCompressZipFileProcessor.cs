@@ -11,6 +11,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ArchiveFlow.FileProcessor
 {
@@ -74,6 +76,24 @@ namespace ArchiveFlow.FileProcessor
                             .ProcessEntry(entry.ToFileInformation(zipFileInfo), entryStream);
                     }
                 }   
+            }
+        }
+
+        public async Task ProcessZipFileAsync(FileInformation zipFileInfo, Stream? stream = null, CancellationToken cancellationToken = default)
+        {
+            if (stream is null && zipFileInfo.InArchive)
+                throw new InvalidOperationException("A nested archive can only be opened via stream.");
+
+            using (var archive = createIArchive(stream is null ? Path.Combine(zipFileInfo.Volume, zipFileInfo.FileName) : null, stream))
+            {
+                foreach(var entry in archive.Entries.Where((e) => e.IsDirectory == false))
+                {
+                    using (var entryStream = entry.OpenEntryStream())
+                    {
+                        await new SingleEntryProcessor(config)
+                            .ProcessEntryAsync(entry.ToFileInformation(zipFileInfo), entryStream, cancellationToken).ConfigureAwait(false);
+                    }
+                }
             }
         }
     }

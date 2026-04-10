@@ -17,6 +17,9 @@ namespace ArchiveFlow.FileProcessor
         public StreamProcessingAction? StreamProcessingAction { get; private set; }
         public TextProcessingAction? TextProcessingAction { get; private set; }
         public BytesProcessingAction? BytesProcessingAction { get; private set; }
+        public AsyncStreamProcessingAction? AsyncStreamProcessingAction { get; private set; }
+        public AsyncTextProcessingAction? AsyncTextProcessingAction { get; private set; }
+        public AsyncBytesProcessingAction? AsyncBytesProcessingAction { get; private set; }
         public FileExceptionHandler? HandleFileException { get; private set; }
         public int? MaxDegreeOfParallelism { get; private set; }
 
@@ -30,6 +33,9 @@ namespace ArchiveFlow.FileProcessor
             StreamProcessingAction? streamProcessingAction = null,
             TextProcessingAction? textProcessingAction = null,
             BytesProcessingAction? bytesProcessingAction = null,
+            AsyncStreamProcessingAction? asyncStreamProcessingAction = null,
+            AsyncTextProcessingAction? asyncTextProcessingAction = null,
+            AsyncBytesProcessingAction? asyncBytesProcessingAction = null,
             FileExceptionHandler? handleFileException = null,
             int? maxDegreeOfParallelism = null)
         {
@@ -42,6 +48,9 @@ namespace ArchiveFlow.FileProcessor
             StreamProcessingAction = streamProcessingAction;
             TextProcessingAction = textProcessingAction;
             BytesProcessingAction = bytesProcessingAction;
+            AsyncStreamProcessingAction = asyncStreamProcessingAction;
+            AsyncTextProcessingAction = asyncTextProcessingAction;
+            AsyncBytesProcessingAction = asyncBytesProcessingAction;
             HandleFileException = handleFileException;
             MaxDegreeOfParallelism = maxDegreeOfParallelism;
         }
